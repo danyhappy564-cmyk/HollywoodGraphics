@@ -4,7 +4,6 @@ using System.IO;
 using System.Reflection;
 using BepInEx.Configuration;
 using Comfort.Common;
-using HollywoodFX;
 using UnityEngine;
 
 namespace HollywoodGraphics;
@@ -110,7 +109,7 @@ public sealed class BloomConfig
         ));
         _lensDust.SettingChanged += OnLensDustChanged;
 
-        DirtLightIntensity = config.Bind(bloomSection, "Lens Bloom Intensity", 1.5f, new ConfigDescription(
+        DirtLightIntensity = config.Bind(bloomSection, "Lens Bloom Intensity", 1.65f, new ConfigDescription(
             "Controls the intensity of lens bloom.",
             new AcceptableValueRange<float>(0f, 5f),
             new ConfigurationManagerAttributes { Order = 93, IsAdvanced = true }
@@ -306,22 +305,6 @@ public class GraphicsConfig
         Current.LodBias.SettingChanged += OnLodBiasChanged;
     }
     
-    public void UpdateLodBias()
-    {
-        if (!Current.Enabled.Value)
-        {
-            if (!Singleton<SharedGameSettingsClass>.Instantiated)
-                return;
-
-            var defaultLodBias = Singleton<SharedGameSettingsClass>.Instance.Graphics.Settings.LodBias;
-            Plugin.Log.LogInfo($"LoD overrides disabled, resetting to the default value of {defaultLodBias}.");
-            QualitySettings.lodBias = defaultLodBias;
-            return;
-        }
-
-        QualitySettings.lodBias = Current.LodBias.Value;
-    }
-
     public void SetMapConfig(string map, bool enabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f)
     {
         foreach (var name in _mapNames[map])
@@ -372,8 +355,8 @@ public class GraphicsConfig
         }
     }
 
-    private void OnLodBiasChanged(object o, EventArgs e)
+    private static void OnLodBiasChanged(object o, EventArgs e)
     {
-        UpdateLodBias();
+        Singleton<GraphicsController>.Instance?.UpdateLodBias();
     }
 }

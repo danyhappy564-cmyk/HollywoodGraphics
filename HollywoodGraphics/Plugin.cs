@@ -2,8 +2,6 @@
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using HollywoodFX;
-using HollywoodGraphics.Lighting.Patches;
 using UnityEngine;
 
 namespace HollywoodGraphics;
@@ -29,8 +27,8 @@ public class Plugin : BaseUnityPlugin
 
         new LampControllerAwakePostfixPatch().Enable();
         new GraphicsRaidInitPatch().Enable();
-        new GraphicsLodOverridePatch().Enable();
-        new GraphicsTerrainDetailOverridePatch().Enable();
+        new GraphicsControllerInitPatch().Enable();
+        new TerrainDetailOverridePatch().Enable();
 
         Log.LogInfo("Initialization finished");
 

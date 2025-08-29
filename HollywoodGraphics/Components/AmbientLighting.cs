@@ -1,16 +1,16 @@
 ﻿using EFT.Weather;
 using UnityEngine;
 
-namespace HollywoodGraphics.Lighting;
+namespace HollywoodGraphics.Components;
 
-public class AmbientLightingController : MonoBehaviour
+public class AmbientLighting
 {
-    private WeatherController _weatherController;
+    private readonly WeatherController _weatherController;
 
     private const float RepeatRate = 5f;
     private float _timer;
 
-    public void Awake()
+    public AmbientLighting()
     {
         _weatherController = GameObject.Find("Weather").GetComponent<WeatherController>();
 

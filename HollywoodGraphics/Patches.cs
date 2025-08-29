@@ -1,12 +1,28 @@
 ﻿using System.Reflection;
+using Comfort.Common;
 using EFT;
-using EFT.UI;
+using EFT.Interactive;
 using GPUInstancer;
-using HollywoodFX;
-using HollywoodGraphics.Postprocessing;
+using HarmonyLib;
 using SPT.Reflection.Patching;
 
 namespace HollywoodGraphics;
+
+public class GraphicsControllerInitPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(GameWorld).GetMethod(nameof(GameWorld.OnGameStarted));
+    }
+
+    [PatchPostfix]
+    // ReSharper disable once InconsistentNaming
+    public static void Postfix(GameWorld __instance)
+    {
+        var graphicsController = __instance.gameObject.AddComponent<GraphicsController>();
+        Singleton<GraphicsController>.Create(graphicsController);
+    }
+}
 
 public class GraphicsRaidInitPatch : ModulePatch
 {
@@ -28,27 +44,38 @@ public class GraphicsRaidInitPatch : ModulePatch
     }
 }
 
-public class GraphicsLodOverridePatch : ModulePatch
+public class LampControllerAwakePostfixPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(GameWorld).GetMethod(nameof(GameWorld.OnGameStarted));
+        return typeof(LampController).GetMethod(nameof(LampController.Awake));
     }
 
-    [PatchPostfix]
-    // ReSharper disable once InconsistentNaming
-    public static void Postfix(GameWorld __instance)
+    [PatchPrefix]
+    // ReSharper disable InconsistentNaming
+    public static void Prefix(LampController __instance, MultiFlareLight[] ___MultiFlareLights, MaterialEmission[] ____materialsWithEmission)
     {
-        Plugin.GraphicsConfig.UpdateLodBias();
-        Plugin.Log.LogInfo($"Updated lod bias to {Plugin.GraphicsConfig.Current.LodBias.Value}");
+        if (!Plugin.GraphicsConfig.LightFlareEnabled.Value)
+            return;
         
-        // Initialize Post-Processing Stack bloom effect
-        __instance.gameObject.AddComponent<BloomController>();
-        Plugin.Log.LogInfo("Bloom effect initialized");
+        // Plugin.Log.LogInfo($"Found light: {__instance.name} lights: {___MultiFlareLights} alights: {__instance.CustomLights.Length}");
+        
+        foreach (var flareLight in ___MultiFlareLights)
+        {
+            // Plugin.Log.LogInfo($"Flare light: {__instance.name} alpha {flareLight.Alpha} scale {flareLight.Scale} flares {flareLight.Flares.Count}");
+
+            // Apply a floor on the alpha and compress the range with an sqrt
+            flareLight.Alpha *= Plugin.GraphicsConfig.LightFlareIntensity.Value;
+
+            var scaleField = Traverse.Create(flareLight).Field("_scale");
+
+            // ReSharper disable once HeapView.BoxingAllocation
+            scaleField.SetValue(scaleField.GetValue<float>() * Plugin.GraphicsConfig.LightFlareSize.Value);
+        }
     }
 }
 
-public class GraphicsTerrainDetailOverridePatch : ModulePatch
+public class TerrainDetailOverridePatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

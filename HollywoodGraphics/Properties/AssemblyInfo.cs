@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
-using HollywoodFX;
 using HollywoodGraphics;
 
 // General Information about an assembly is controlled through the following

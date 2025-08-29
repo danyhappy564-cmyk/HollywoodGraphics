@@ -7,15 +7,15 @@ namespace HollywoodGraphics;
 public class GraphicsController : MonoBehaviour
 {
     private Bloom _bloom;
-    private AmbientLighting _ambientLight;
+    private Atmosphere _ambientLight;
     
     public void Start()
     {
-        _ambientLight = new AmbientLighting();
-        Plugin.Log.LogInfo("Ambient lighting initialized");
+        _ambientLight = new Atmosphere();
+        Plugin.Log.LogInfo("Atmospherics initialized");
         
         _bloom = new Bloom();
-        Plugin.Log.LogInfo("Bloom effect initialized");
+        Plugin.Log.LogInfo("Bloom initialized");
         
         UpdateLodBias();
         Plugin.Log.LogInfo($"Updated lod bias to {Plugin.GraphicsConfig.Current.LodBias.Value}");

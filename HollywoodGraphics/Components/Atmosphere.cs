@@ -3,22 +3,40 @@ using UnityEngine;
 
 namespace HollywoodGraphics.Components;
 
-public class AmbientLighting
+public class Atmosphere
 {
     private readonly WeatherController _weatherController;
 
     private const float RepeatRate = 5f;
     private float _timer;
 
-    public AmbientLighting()
+    public Atmosphere()
     {
-        _weatherController = GameObject.Find("Weather").GetComponent<WeatherController>();
+        var weather = GameObject.Find("Weather");
+        
+        if (weather == null)
+            return;
+            
+        _weatherController = weather.GetComponent<WeatherController>();
 
         // Increase sun brightness a lot since the default value is not nearly enough to trigger a decent flare
         _weatherController.TOD_Sky_0.Sun.MeshBrightness = 10f;
         _weatherController.TOD_Sky_0.Moon.MeshSize = 0.5f;
         _weatherController.TOD_Sky_0.Moon.HaloSize = 0.5f;
         _weatherController.TOD_Sky_0.Moon.MeshBrightness = 2f;
+        _weatherController.TOD_Sky_0.Moon.HaloColor = new Gradient()
+        {
+            alphaKeys =
+            [
+                new(1f, 0.0f),
+                new(1f, 1f)
+            ],
+            colorKeys =
+            [
+                new GradientColorKey(new Color( 0.45f,  0.50f,  0.6f, 1f), 0.0f),
+                new GradientColorKey(new Color( 0.45f,  0.50f,  0.6f, 1f), 1f)
+            ]
+        };
         
         // _weatherController.TOD_Sky_0.Day.LightIntensity = 0.75f;
         // _weatherController.TimeOfDayController.ScatteringBrightnessMultiplier = 0.75f;
@@ -49,24 +67,13 @@ public class AmbientLighting
         //         new GradientColorKey(new Color(0.58f, 0.53f, 0.45f), 1f)
         //     ]
         // };
-        
-        _weatherController.TOD_Sky_0.Moon.HaloColor = new Gradient()
-        {
-            alphaKeys =
-            [
-                new(1f, 0.0f),
-                new(1f, 1f)
-            ],
-            colorKeys =
-            [
-                new GradientColorKey(new Color( 0.45f,  0.50f,  0.6f, 1f), 0.0f),
-                new GradientColorKey(new Color( 0.45f,  0.50f,  0.6f, 1f), 1f)
-            ]
-        };
     }
 
     public void Update()
     {
+        if (_weatherController == null)
+            return;
+        
         if (_timer <= 0)
         {
             // Force this value again since *some mods* modify this in a way that's tricky to bypass

@@ -1,11 +1,48 @@
-﻿namespace HollywoodGraphics.Components;
+﻿using Prism.Utils;
+using UnityEngine;
 
-public class ToneMap
+namespace HollywoodGraphics.Components;
+
+public class Tonemap
 {
-    private static PrismEffects FPSCameraPrismEffects;
+    private readonly PrismEffects _prism;
+    private readonly CC_Vintage _cc;
 
-    public ToneMap()
+    private readonly TonemapType _defaultTonemapType;
+    private readonly Vector3 _defaultTonemapPrimary;
+    private readonly Vector3 _defaultTonemapSecondary;
+    
+    public Tonemap()
     {
-        // FPSCameraPrismEffects.dof
+        var camera = CameraClass.Instance?.Camera;
+
+        if (camera == null)
+        {
+            Plugin.Log.LogError("Tonemap: No camera found!");
+            return;
+        }
+
+        _prism = camera.GetComponent<PrismEffects>();
+        _cc = camera.GetComponent<CC_Vintage>();
+        
+        _defaultTonemapType = _prism.tonemapType;
+        _defaultTonemapPrimary = _prism.toneValues;
+        _defaultTonemapSecondary = _prism.secondaryToneValues;
+    }
+
+    public void UpdateSettings()
+    {
+        _cc.enabled = false;
+        _prism.tonemapType = TonemapType.ACES;
+        _prism.toneValues = Plugin.GraphicsConfig.Current.TonemapPrimary.Value;
+        _prism.secondaryToneValues = Plugin.GraphicsConfig.Current.TonemapSecondary.Value;
+    }
+
+    public void Disable()
+    {
+        _cc.enabled = true;
+        _prism.tonemapType = _defaultTonemapType;
+        _prism.toneValues = _defaultTonemapPrimary;
+        _prism.secondaryToneValues = _defaultTonemapSecondary;
     }
 }

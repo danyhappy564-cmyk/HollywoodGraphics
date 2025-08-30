@@ -6,8 +6,9 @@ namespace HollywoodGraphics;
 
 public class GraphicsController : MonoBehaviour
 {
-    private Bloom _bloom;
     private Atmosphere _ambientLight;
+    private Bloom _bloom;
+    private Tonemap _tonemap;
     
     public void Start()
     {
@@ -17,24 +18,33 @@ public class GraphicsController : MonoBehaviour
         _bloom = new Bloom();
         Plugin.Log.LogInfo("Bloom initialized");
         
-        UpdateLodBias();
+        _tonemap = new Tonemap();
+        Plugin.Log.LogInfo("Tonemap initialized");
+        
+        UpdateMapSettings();
         Plugin.Log.LogInfo($"Updated lod bias to {Plugin.GraphicsConfig.Current.LodBias.Value}");
     }
     
-    public void UpdateLodBias()
+    public void UpdateMapSettings()
     {
-        if (!Plugin.GraphicsConfig.Current.Enabled.Value)
+        if (Plugin.GraphicsConfig.Current.LodEnabled.Value)
         {
-            if (!Singleton<SharedGameSettingsClass>.Instantiated)
-                return;
-
-            var defaultLodBias = Singleton<SharedGameSettingsClass>.Instance.Graphics.Settings.LodBias;
-            Plugin.Log.LogInfo($"LoD overrides disabled, resetting to the default value of {defaultLodBias}.");
-            QualitySettings.lodBias = defaultLodBias;
-            return;
+            QualitySettings.lodBias = Plugin.GraphicsConfig.Current.LodBias.Value;
+        }
+        else
+        {
+            if (Singleton<SharedGameSettingsClass>.Instantiated)
+                QualitySettings.lodBias = Singleton<SharedGameSettingsClass>.Instance.Graphics.Settings.LodBias;
         }
 
-        QualitySettings.lodBias = Plugin.GraphicsConfig.Current.LodBias.Value;
+        if (Plugin.GraphicsConfig.Current.TonemapEnabled.Value)
+        {
+            _tonemap.UpdateSettings();
+        }
+        else
+        {
+            _tonemap.Disable();
+        }
     }
     
     private void Update()

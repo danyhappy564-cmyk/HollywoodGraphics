@@ -14,22 +14,22 @@ public class Bloom
     public Bloom()
     {
         // Find the main camera
-        var targetCamera = CameraClass.Instance?.Camera;
+        var camera = CameraClass.Instance?.Camera;
 
-        if (targetCamera == null)
+        if (camera == null)
         {
-            Plugin.Log.LogError("UltimateBloomController: No camera found!");
+            Plugin.Log.LogError("Bloom: No camera found!");
             return;
         }
 
         // Check if Ultimate Bloom is already on the camera
-        _ultimateBloom = targetCamera.GetComponent<UltimateBloom>();
+        _ultimateBloom = camera.GetComponent<UltimateBloom>();
 
         if (_ultimateBloom == null)
         {
             // Add Ultimate Bloom component to camera
-            _ultimateBloom = targetCamera.gameObject.AddComponent<UltimateBloom>();
-            Plugin.Log.LogInfo("UltimateBloomController: Added Ultimate Bloom component to camera");
+            _ultimateBloom = camera.gameObject.AddComponent<UltimateBloom>();
+            Plugin.Log.LogInfo("Bloom: Added Ultimate Bloom component to camera");
         }
 
         _ultimateBloom.m_IntensityManagement = UltimateBloom.BloomIntensityManagement.FilmicCurve;
@@ -62,7 +62,7 @@ public class Bloom
         
         Plugin.GraphicsConfig.Bloom.ConfigChanged += UpdateSettings;
         Plugin.GraphicsConfig.Bloom.LensDirtChanged += UpdateLensDirt;
-        Plugin.Log.LogInfo($"UltimateBloomController: Ultimate Bloom effect applied to camera {targetCamera.name}");
+        Plugin.Log.LogInfo($"Bloom: Ultimate Bloom effect applied to camera {camera.name}");
 
         var weather = GameObject.Find("Weather");
         

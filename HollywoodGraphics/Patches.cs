@@ -39,7 +39,7 @@ public class GraphicsRaidInitPatch : ModulePatch
         Plugin.GraphicsConfig.SetCurrentMap(mapName);
         
         var overrides = Plugin.GraphicsConfig.Current;
-        var message = $"Graphics overrides map: {mapName} - {overrides.Name} enabled: {overrides.Enabled.Value}";
+        var message = $"Graphics overrides map: {mapName} - {overrides.Name} enabled: {overrides.LodEnabled.Value}";
         Plugin.Log.LogInfo(message);
     }
 }
@@ -89,10 +89,10 @@ public class TerrainDetailOverridePatch : ModulePatch
         var overrides = Plugin.GraphicsConfig.Current;
         
         Plugin.Log.LogInfo(
-            $"Terrain detail overrides: {overrides.Name} enabled: {overrides.Enabled.Value} terrain: {__instance.terrain.name} DistT: {__instance.terrain.detailObjectDistance} Dist: {__instance.terrainSettings.maxDetailDistance} DistL: {__instance.terrainSettings.maxDetailDistanceLegacy} Dens: {__instance.terrainSettings.detailDensity}"
+            $"Terrain detail overrides: {overrides.Name} enabled: {overrides.LodEnabled.Value} terrain: {__instance.terrain.name} DistT: {__instance.terrain.detailObjectDistance} Dist: {__instance.terrainSettings.maxDetailDistance} DistL: {__instance.terrainSettings.maxDetailDistanceLegacy} Dens: {__instance.terrainSettings.detailDensity}"
         );
         
-        if (!overrides.Enabled.Value)
+        if (!overrides.LodEnabled.Value)
             return;
 
         var terrainDetailDistance = overrides.DetailDistance.Value;

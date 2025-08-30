@@ -10,16 +10,25 @@ namespace HollywoodGraphics;
 
 public class MapConfig(
     string name,
-    ConfigEntry<bool> enabled,
+    ConfigEntry<bool> lodEnabled,
     ConfigEntry<float> lodBias,
     ConfigEntry<float> detailDistance,
-    ConfigEntry<float> detailDensity)
+    ConfigEntry<float> detailDensity,
+    ConfigEntry<bool> tonemapEnabled,
+    ConfigEntry<Vector3> tonemapPrimary,
+    ConfigEntry<Vector3> tonemapSecondary
+)
 {
     public readonly string Name = name;
-    public readonly ConfigEntry<bool> Enabled = enabled;
+
+    public readonly ConfigEntry<bool> LodEnabled = lodEnabled;
     public readonly ConfigEntry<float> LodBias = lodBias;
     public readonly ConfigEntry<float> DetailDistance = detailDistance;
     public readonly ConfigEntry<float> DetailDensity = detailDensity;
+
+    public readonly ConfigEntry<bool> TonemapEnabled = tonemapEnabled;
+    public readonly ConfigEntry<Vector3> TonemapPrimary = tonemapPrimary;
+    public readonly ConfigEntry<Vector3> TonemapSecondary = tonemapSecondary;
 }
 
 public sealed class BloomConfig
@@ -101,7 +110,7 @@ public sealed class BloomConfig
             new ConfigurationManagerAttributes { Order = 95 }
         ));
         _dustIntensity.SettingChanged += OnConfigChanged;
-        
+
         _lensDust = config.Bind(bloomSection, "Lens Dust Texture", "LensDust4.png", new ConfigDescription(
             "Texture to use for the lens dust effect.",
             null,
@@ -199,12 +208,12 @@ public sealed class BloomConfig
             return;
 
         var assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        
+
         if (assemblyDirectory == null)
             return;
-        
+
         var path = Path.Combine(assemblyDirectory, "bloom", _lensDust.Value);
-        
+
         if (!File.Exists(path))
             return;
 
@@ -233,7 +242,7 @@ public class GraphicsConfig
     public readonly ConfigEntry<bool> LightFlareEnabled;
     public readonly ConfigEntry<float> LightFlareIntensity;
     public readonly ConfigEntry<float> LightFlareSize;
-    
+
     public readonly BloomConfig Bloom;
 
     private readonly Dictionary<string, MapConfig> _mapConfigs = new();
@@ -241,7 +250,8 @@ public class GraphicsConfig
     private readonly Dictionary<string, string[]> _mapNames = new()
     {
         { "Customs", ["bigmap"] },
-        { "Factory", ["factory4_day", "factory4_night"] },
+        { "FactoryDay", ["factory4_day"] },
+        { "FactoryNight", ["factory4_night"] },
         { "Interchange", ["interchange"] },
         { "Laboratory", ["laboratory"] },
         { "Lighthouse", ["lighthouse"] },
@@ -256,45 +266,49 @@ public class GraphicsConfig
     public GraphicsConfig(ConfigFile config)
     {
         const string lights = "01. Lights";
-        
+
         LightFlareEnabled = config.Bind(lights, "Env. Light Flares Changes (RESTART)", true, new ConfigDescription(
             "Makes the environmental light flares more prominent and appropriate. Bright lights have bright flares, dim lights have dim flares.",
             null,
-            new ConfigurationManagerAttributes { Order = 3}
+            new ConfigurationManagerAttributes { Order = 3 }
         ));
 
         LightFlareIntensity = config.Bind(lights, "Env. Light Flare Intensity (RESTART)", 1f, new ConfigDescription(
             "Adjusts the intensity of environment light lens flares. Yes, I identify as a Hasselblad H6D-400C camera, thank you.",
             new AcceptableValueRange<float>(0f, 10f),
-            new ConfigurationManagerAttributes { Order = 2}
+            new ConfigurationManagerAttributes { Order = 2 }
         ));
 
         LightFlareSize = config.Bind(lights, "Env. Light Flare Size (RESTART)", 1f, new ConfigDescription(
             "Adjusts the size of environment light lens flares. Yes, I identify as a Hasselblad H6D-400C camera, thank you.",
             new AcceptableValueRange<float>(0f, 10f),
-            new ConfigurationManagerAttributes { Order = 1}
+            new ConfigurationManagerAttributes { Order = 1 }
         ));
-        
+
         Bloom = new BloomConfig(config);
 
         AddMapConfig(config, "Default", browsable: false);
-        AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f);
-        AddMapConfig(config, "Factory");
-        AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f);
-        AddMapConfig(config, "Laboratory");
-        AddMapConfig(config, "Lighthouse", false, 10f, 2.5f, 2f);
-        AddMapConfig(config, "Reserve", false, 4f, 2.5f, 2f);
-        AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f);
-        AddMapConfig(config, "Shoreline", false, 10f, 2.5f, 2f);
-        AddMapConfig(config, "Streets");
-        AddMapConfig(config, "Woods", false, 10f, 2.5f, 2f);
+        AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
+        AddMapConfig(config, "FactoryDay", tonemapPrimary: new Vector3(25f, -0.4f, 25f));
+        AddMapConfig(config, "FactoryNight", tonemapPrimary: new Vector3(25f, 0f, 25f));
+        AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
+        AddMapConfig(config, "Laboratory", tonemapPrimary: new Vector3(20f, -0.4f, 20f));
+        AddMapConfig(config, "Lighthouse", false, 10f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
+        AddMapConfig(config, "Reserve", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
+        AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(25f, -0.4f, 25f));
+        AddMapConfig(config, "Shoreline", false, 10f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
+        AddMapConfig(config, "Streets", tonemapPrimary: new Vector3(25f, -0.4f, 25f));
+        AddMapConfig(config, "Woods", false, 10f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
 
         Current = _mapConfigs["default"];
     }
 
     public void SetCurrentMap(string map)
     {
-        Current.LodBias.SettingChanged -= OnLodBiasChanged;
+        Current.LodBias.SettingChanged -= OnMapSettingsChanged;
+        Current.TonemapEnabled.SettingChanged -= OnMapSettingsChanged;
+        Current.TonemapPrimary.SettingChanged -= OnMapSettingsChanged;
+        Current.TonemapSecondary.SettingChanged -= OnMapSettingsChanged;
 
         if (!_mapConfigs.TryGetValue(map, out Current))
         {
@@ -302,16 +316,19 @@ public class GraphicsConfig
             Current = _mapConfigs["default"];
         }
 
-        Current.LodBias.SettingChanged += OnLodBiasChanged;
+        Current.LodBias.SettingChanged += OnMapSettingsChanged;
+        Current.TonemapEnabled.SettingChanged += OnMapSettingsChanged;
+        Current.TonemapPrimary.SettingChanged += OnMapSettingsChanged;
+        Current.TonemapSecondary.SettingChanged += OnMapSettingsChanged;
     }
-    
+
     public void SetMapConfig(string map, bool enabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f)
     {
         foreach (var name in _mapNames[map])
         {
             var overrides = _mapConfigs[name];
 
-            overrides.Enabled.Value = enabled;
+            overrides.LodEnabled.Value = enabled;
             overrides.LodBias.Value = lodBias;
             overrides.DetailDistance.Value = detailDistance;
             overrides.DetailDensity.Value = detailDensityScaling;
@@ -320,32 +337,50 @@ public class GraphicsConfig
 
     private void AddMapConfig(
         ConfigFile config, string map,
-        bool enabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f, bool browsable = true
+        bool lodEnabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f,
+        bool tonemapEnabled = true, Vector3 tonemapPrimary = default, Vector3 tonemapSecondary = default,
+        bool browsable = true
     )
     {
+        if (tonemapSecondary == default)
+            tonemapSecondary = new Vector3(0f, 1f, 0f);
+
         var mapSection = $"03. Map: {map}";
-        
+
         var overrides = new MapConfig(
             map,
-            config.Bind(mapSection, $"{map} Enable (RESTART)", enabled, new ConfigDescription(
+            config.Bind(mapSection, $"{map} Enable LOD", lodEnabled, new ConfigDescription(
                 "Toggles whether the LOD settings should be overridden at all.",
                 null,
-                new ConfigurationManagerAttributes { Order = 4, Browsable = browsable }
+                new ConfigurationManagerAttributes { Order = 7, Browsable = browsable }
             )),
             config.Bind(mapSection, $"{map} LOD Bias", lodBias, new ConfigDescription(
                 "Adjust the LOD bias in a wider range than what the game allows.",
                 new AcceptableValueRange<float>(1f, 20f),
-                new ConfigurationManagerAttributes { Order = 3, Browsable = browsable }
+                new ConfigurationManagerAttributes { Order = 6, Browsable = browsable }
             )),
-            config.Bind(mapSection, $"{map} Detail Cull Range", detailDistance, new ConfigDescription(
+            config.Bind(mapSection, $"{map} Detail Cull", detailDistance, new ConfigDescription(
                 "Scales the maximum visible distance for detail like rocks, debris and foliage.",
                 new AcceptableValueRange<float>(0.5f, 10f),
-                new ConfigurationManagerAttributes { Order = 2, Browsable = browsable}
+                new ConfigurationManagerAttributes { Order = 5, Browsable = browsable, IsAdvanced = true }
             )),
             config.Bind(mapSection, $"{map} Detail Density", detailDensityScaling, new ConfigDescription(
                 "Scales the density of detail like rocks, debris and foliage.",
                 new AcceptableValueRange<float>(0.5f, 5f),
-                new ConfigurationManagerAttributes { Order = 1, Browsable = browsable}
+                new ConfigurationManagerAttributes { Order = 4, Browsable = browsable, IsAdvanced = true }
+            )),
+            config.Bind(mapSection, $"{map} Enable Tonemap", tonemapEnabled, new ConfigDescription(
+                "Toggles overriding the tonemap.",
+                null,
+                new ConfigurationManagerAttributes { Order = 3, Browsable = browsable }
+            )),
+            config.Bind(mapSection, $"{map} Primary Tonemap", tonemapPrimary, new ConfigDescription(
+                "The default camera position offset relative to the first person view (in meters).",
+                tags: new ConfigurationManagerAttributes { Order = 2, Browsable = browsable, IsAdvanced = true }
+            )),
+            config.Bind(mapSection, $"{map} Secondary Tonemap", tonemapSecondary, new ConfigDescription(
+                "The default camera position offset relative to the first person view (in meters).",
+                tags: new ConfigurationManagerAttributes { Order = 1, Browsable = browsable, IsAdvanced = true}
             ))
         );
 
@@ -355,8 +390,8 @@ public class GraphicsConfig
         }
     }
 
-    private static void OnLodBiasChanged(object o, EventArgs e)
+    private static void OnMapSettingsChanged(object o, EventArgs e)
     {
-        Singleton<GraphicsController>.Instance?.UpdateLodBias();
+        Singleton<GraphicsController>.Instance?.UpdateMapSettings();
     }
 }

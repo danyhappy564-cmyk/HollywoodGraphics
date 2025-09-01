@@ -45,8 +45,21 @@ public class GraphicsController : MonoBehaviour
         {
             _tonemap.Disable();
         }
+        
+        // Apply per map bloom stuff
+        _bloom.UpdateSettings();
+    }
+
+    public void UpdateBloomSettings()
+    {
+        _bloom.UpdateSettings();
     }
     
+    public void UpdateLensDust()
+    {
+        _bloom.UpdateLensDust();
+    }
+
     private void Update()
     {
         _bloom.Update();
@@ -55,6 +68,6 @@ public class GraphicsController : MonoBehaviour
 
     private void OnDestroy()
     {
-        _bloom.Destroy();
+        Bloom.Destroy();
     }
 }

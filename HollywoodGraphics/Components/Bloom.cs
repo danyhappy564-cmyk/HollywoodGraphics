@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using EFT.Weather;
 using UnityEngine;
 
@@ -57,11 +59,8 @@ public class Bloom
             _ultimateBloom.m_StarBloomUsages[i] = false;
         }
         
-        Plugin.GraphicsConfig.Bloom.ApplyConfig(_ultimateBloom);
-        Plugin.GraphicsConfig.Bloom.ApplyLensDust(_ultimateBloom);
-        
-        Plugin.GraphicsConfig.Bloom.ConfigChanged += UpdateSettings;
-        Plugin.GraphicsConfig.Bloom.LensDirtChanged += UpdateLensDirt;
+        UpdateSettings();
+        UpdateLensDust();
         Plugin.Log.LogInfo($"Bloom: Ultimate Bloom effect applied to camera {camera.name}");
 
         var weather = GameObject.Find("Weather");
@@ -83,10 +82,11 @@ public class Bloom
             return;
 
         var bloomConfig = Plugin.GraphicsConfig.Bloom;
+        
         // Decrease streak size at night
         var streakScale = 1f - 0.5f * nightFactor;
         _ultimateBloom.m_AnamorphicScale = bloomConfig.AnamorphicScale.Value * streakScale;
-        _ultimateBloom.m_DirtLightIntensity = bloomConfig.DirtLightIntensity.Value + nightFactor;
+        _ultimateBloom.m_DirtLightIntensity = bloomConfig.DirtLightIntensity.Value * Plugin.GraphicsConfig.Current.BloomMultiplier.Value + nightFactor;
         _ultimateBloom.m_StarFlareIntensity = bloomConfig.DirtLightIntensity.Value + 0.5f * nightFactor;
 
         var highlightScaling = 1f + 0.1f * nightFactor;
@@ -100,10 +100,57 @@ public class Bloom
         _sunLightFactor = nightFactor;
     }
     
-    public void Destroy()
+    public static void Destroy()
     {
-        Plugin.GraphicsConfig.Bloom.ConfigChanged -= UpdateSettings;
-        Plugin.GraphicsConfig.Bloom.LensDirtChanged -= UpdateLensDirt;
+    }
+    
+    public void UpdateSettings()
+    {
+        var config = Plugin.GraphicsConfig.Bloom;
+        
+        _ultimateBloom.m_BloomIntensity = config.BloomIntensity.Value;
+        _ultimateBloom.SetFilmicCurveParameters(config.BloomMid.Value, config.BloomDark.Value, config.BloomBright.Value, config.BloomHighlight.Value);
+
+        _ultimateBloom.m_UseLensDust = config.UseLensDust.Value;
+        _ultimateBloom.m_DustIntensity = config.DustIntensity.Value;
+        _ultimateBloom.m_DirtLightIntensity = config.DirtLightIntensity.Value * Plugin.GraphicsConfig.Current.BloomMultiplier.Value;
+
+        _ultimateBloom.m_UseAnamorphicFlare = config.UseAnamorphicFlare.Value;
+        _ultimateBloom.m_AnamorphicFlareIntensity = config.AnamorphicFlareIntensity.Value;
+        _ultimateBloom.m_AnamorphicScale = config.AnamorphicScale.Value;
+        _ultimateBloom.m_AnamorphicBlurPass = config.AnamorphicBlurPass.Value;
+
+        _ultimateBloom.m_UseStarFlare = config.UseStarFlare.Value;
+        _ultimateBloom.m_StarFlareIntensity = config.StarFlareIntensity.Value;
+        _ultimateBloom.m_StarScale = config.StarScale.Value;
+        _ultimateBloom.m_StarBlurPass = config.StarBlurPass.Value;
+        
+        // Force the recalculation of the sunlight factor
+        _sunLightFactor = 10000f;
+    }
+
+    public void UpdateLensDust()
+    {
+        var config = Plugin.GraphicsConfig.Bloom;
+        
+        if (config.LensDust.Value == null)
+            return;
+
+        var assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        if (assemblyDirectory == null)
+            return;
+
+        var path = Path.Combine(assemblyDirectory, "bloom", config.LensDust.Value);
+
+        if (!File.Exists(path))
+            return;
+
+        var data = File.ReadAllBytes(path);
+        var tex2D = new Texture2D(1920, 1080, TextureFormat.RGBA32, true);
+
+        tex2D.LoadImage(data);
+        _ultimateBloom.m_DustTexture = tex2D;
     }
     
     private static void ResetIntensities(float[] intensities)
@@ -113,18 +160,5 @@ public class Bloom
             Plugin.Log.LogInfo($"Intensity: {intensities[i]}");
             intensities[i] = 1f;
         }
-    }
-    
-    private void UpdateSettings(object sender, EventArgs e)
-    {
-        Plugin.GraphicsConfig.Bloom.ApplyConfig(_ultimateBloom);
-
-        // Force the recalculation of the sunlight factor
-        _sunLightFactor = 10000f;
-    }
-
-    private void UpdateLensDirt(object sender, EventArgs e)
-    {
-        Plugin.GraphicsConfig.Bloom.ApplyLensDust(_ultimateBloom);
     }
 }

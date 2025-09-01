@@ -16,7 +16,8 @@ public class MapConfig(
     ConfigEntry<float> detailDensity,
     ConfigEntry<bool> tonemapEnabled,
     ConfigEntry<Vector3> tonemapPrimary,
-    ConfigEntry<Vector3> tonemapSecondary
+    ConfigEntry<Vector3> tonemapSecondary,
+    ConfigEntry<float> bloomMultiplier
 )
 {
     public readonly string Name = name;
@@ -29,45 +30,44 @@ public class MapConfig(
     public readonly ConfigEntry<bool> TonemapEnabled = tonemapEnabled;
     public readonly ConfigEntry<Vector3> TonemapPrimary = tonemapPrimary;
     public readonly ConfigEntry<Vector3> TonemapSecondary = tonemapSecondary;
+    
+    public readonly ConfigEntry<float> BloomMultiplier = bloomMultiplier;
 }
 
 public sealed class BloomConfig
 {
-    public event EventHandler ConfigChanged;
-    public event EventHandler LensDirtChanged;
-
-    private readonly ConfigEntry<float> _bloomIntensity;
+    public readonly ConfigEntry<float> BloomIntensity;
 
     public readonly ConfigEntry<float> BloomDark;
     public readonly ConfigEntry<float> BloomMid;
     public readonly ConfigEntry<float> BloomBright;
     public readonly ConfigEntry<float> BloomHighlight;
 
-    private readonly ConfigEntry<bool> _useLensDust;
-    private readonly ConfigEntry<float> _dustIntensity;
+    public readonly ConfigEntry<bool> UseLensDust;
+    public readonly ConfigEntry<float> DustIntensity;
     public readonly ConfigEntry<float> DirtLightIntensity;
 
-    private readonly ConfigEntry<bool> _useAnamorphicFlare;
-    private readonly ConfigEntry<float> _anamorphicFlareIntensity;
+    public readonly ConfigEntry<bool> UseAnamorphicFlare;
+    public readonly ConfigEntry<float> AnamorphicFlareIntensity;
     public readonly ConfigEntry<float> AnamorphicScale;
-    private readonly ConfigEntry<int> _anamorphicBlurPass;
+    public readonly ConfigEntry<int> AnamorphicBlurPass;
 
-    private readonly ConfigEntry<bool> _useStarFlare;
-    private readonly ConfigEntry<float> _starFlareIntensity;
-    private readonly ConfigEntry<float> _starScale;
-    private readonly ConfigEntry<int> _starBlurPass;
-    private readonly ConfigEntry<string> _lensDust;
+    public readonly ConfigEntry<bool> UseStarFlare;
+    public readonly ConfigEntry<float> StarFlareIntensity;
+    public readonly ConfigEntry<float> StarScale;
+    public readonly ConfigEntry<int> StarBlurPass;
+    public readonly ConfigEntry<string> LensDust;
 
     public BloomConfig(ConfigFile config)
     {
         const string bloomSection = "02. Bloom";
 
-        _bloomIntensity = config.Bind(bloomSection, "Master Bloom Intensity", 0.2f, new ConfigDescription(
+        BloomIntensity = config.Bind(bloomSection, "Master Bloom Intensity", 0.2f, new ConfigDescription(
             "Controls the overall intensity of the bloom effect.",
             new AcceptableValueRange<float>(0f, 5f),
             new ConfigurationManagerAttributes { Order = 104 }
         ));
-        _bloomIntensity.SettingChanged += OnConfigChanged;
+        BloomIntensity.SettingChanged += OnConfigChanged;
 
         BloomDark = config.Bind(bloomSection, "Bloom Curve Dark", -0.98f, new ConfigDescription(
             "Bloom intensity of the dark colors range.",
@@ -97,26 +97,26 @@ public sealed class BloomConfig
         ));
         BloomHighlight.SettingChanged += OnConfigChanged;
 
-        _useLensDust = config.Bind(bloomSection, "Use Lens Dust", true, new ConfigDescription(
+        UseLensDust = config.Bind(bloomSection, "Use Lens Dust", true, new ConfigDescription(
             "Enables lens dust effect.",
             null,
             new ConfigurationManagerAttributes { Order = 96 }
         ));
-        _useLensDust.SettingChanged += OnConfigChanged;
+        UseLensDust.SettingChanged += OnConfigChanged;
 
-        _dustIntensity = config.Bind(bloomSection, "Lens Dust Amount", 0.3f, new ConfigDescription(
+        DustIntensity = config.Bind(bloomSection, "Lens Dust Amount", 0.3f, new ConfigDescription(
             "Controls the intensity of the lens dust effect.",
             new AcceptableValueRange<float>(0f, 5f),
             new ConfigurationManagerAttributes { Order = 95 }
         ));
-        _dustIntensity.SettingChanged += OnConfigChanged;
+        DustIntensity.SettingChanged += OnConfigChanged;
 
-        _lensDust = config.Bind(bloomSection, "Lens Dust Texture", "LensDust4.png", new ConfigDescription(
+        LensDust = config.Bind(bloomSection, "Lens Dust Texture", "LensDust4.png", new ConfigDescription(
             "Texture to use for the lens dust effect.",
             null,
             new ConfigurationManagerAttributes { Order = 94 }
         ));
-        _lensDust.SettingChanged += OnLensDustChanged;
+        LensDust.SettingChanged += OnLensDustChanged;
 
         DirtLightIntensity = config.Bind(bloomSection, "Lens Bloom Intensity", 1.65f, new ConfigDescription(
             "Controls the intensity of lens bloom.",
@@ -125,19 +125,19 @@ public sealed class BloomConfig
         ));
         DirtLightIntensity.SettingChanged += OnConfigChanged;
 
-        _useAnamorphicFlare = config.Bind(bloomSection, "Use Anamorphic Flare", true, new ConfigDescription(
+        UseAnamorphicFlare = config.Bind(bloomSection, "Use Anamorphic Flare", true, new ConfigDescription(
             "Enables anamorphic lens flare effects.",
             null,
             new ConfigurationManagerAttributes { Order = 84 }
         ));
-        _useAnamorphicFlare.SettingChanged += OnConfigChanged;
+        UseAnamorphicFlare.SettingChanged += OnConfigChanged;
 
-        _anamorphicFlareIntensity = config.Bind(bloomSection, "Anamorphic Flare Intensity", 2f, new ConfigDescription(
+        AnamorphicFlareIntensity = config.Bind(bloomSection, "Anamorphic Flare Intensity", 2f, new ConfigDescription(
             "Controls the intensity of anamorphic flares.",
             new AcceptableValueRange<float>(0f, 5f),
             new ConfigurationManagerAttributes { Order = 83 }
         ));
-        _anamorphicFlareIntensity.SettingChanged += OnConfigChanged;
+        AnamorphicFlareIntensity.SettingChanged += OnConfigChanged;
 
         AnamorphicScale = config.Bind(bloomSection, "Anamorphic Flare Scale", 10f, new ConfigDescription(
             "Scaling factor for anamorphic flares.",
@@ -146,92 +146,50 @@ public sealed class BloomConfig
         ));
         AnamorphicScale.SettingChanged += OnConfigChanged;
 
-        _anamorphicBlurPass = config.Bind(bloomSection, "Anamorphic Flare Blur Passes", 4, new ConfigDescription(
+        AnamorphicBlurPass = config.Bind(bloomSection, "Anamorphic Flare Blur Passes", 4, new ConfigDescription(
             "Number of blur passes for anamorphic flares.",
             new AcceptableValueRange<int>(1, 5),
             new ConfigurationManagerAttributes { Order = 80, IsAdvanced = true }
         ));
-        _anamorphicBlurPass.SettingChanged += OnConfigChanged;
+        AnamorphicBlurPass.SettingChanged += OnConfigChanged;
 
-        _useStarFlare = config.Bind(bloomSection, "Use Star Flare", true, new ConfigDescription(
+        UseStarFlare = config.Bind(bloomSection, "Use Star Flare", true, new ConfigDescription(
             "Enables star-shaped lens flare effects.",
             null,
             new ConfigurationManagerAttributes { Order = 79 }
         ));
-        _useStarFlare.SettingChanged += OnConfigChanged;
+        UseStarFlare.SettingChanged += OnConfigChanged;
 
-        _starFlareIntensity = config.Bind(bloomSection, "Star Flare Intensity", 1.5f, new ConfigDescription(
+        StarFlareIntensity = config.Bind(bloomSection, "Star Flare Intensity", 1.5f, new ConfigDescription(
             "Controls the intensity of star flares.",
             new AcceptableValueRange<float>(0f, 5f),
             new ConfigurationManagerAttributes { Order = 78 }
         ));
-        _starFlareIntensity.SettingChanged += OnConfigChanged;
+        StarFlareIntensity.SettingChanged += OnConfigChanged;
 
-        _starScale = config.Bind(bloomSection, "Star Flare Scale", 5f, new ConfigDescription(
+        StarScale = config.Bind(bloomSection, "Star Flare Scale", 5f, new ConfigDescription(
             "Scaling factor for star flares.",
             new AcceptableValueRange<float>(0f, 20f),
             new ConfigurationManagerAttributes { Order = 77 }
         ));
-        _starScale.SettingChanged += OnConfigChanged;
+        StarScale.SettingChanged += OnConfigChanged;
 
-        _starBlurPass = config.Bind(bloomSection, "Star Flare Blur Passes", 2, new ConfigDescription(
+        StarBlurPass = config.Bind(bloomSection, "Star Flare Blur Passes", 2, new ConfigDescription(
             "Number of blur passes for star flares.",
             new AcceptableValueRange<int>(1, 5),
             new ConfigurationManagerAttributes { Order = 76, IsAdvanced = true }
         ));
-        _starBlurPass.SettingChanged += OnConfigChanged;
-    }
-
-    public void ApplyConfig(UltimateBloom ultimateBloom)
-    {
-        ultimateBloom.m_BloomIntensity = _bloomIntensity.Value;
-        ultimateBloom.SetFilmicCurveParameters(BloomMid.Value, BloomDark.Value, BloomBright.Value, BloomHighlight.Value);
-
-        ultimateBloom.m_UseLensDust = _useLensDust.Value;
-        ultimateBloom.m_DustIntensity = _dustIntensity.Value;
-        ultimateBloom.m_DirtLightIntensity = DirtLightIntensity.Value;
-
-        ultimateBloom.m_UseAnamorphicFlare = _useAnamorphicFlare.Value;
-        ultimateBloom.m_AnamorphicFlareIntensity = _anamorphicFlareIntensity.Value;
-        ultimateBloom.m_AnamorphicScale = AnamorphicScale.Value;
-        ultimateBloom.m_AnamorphicBlurPass = _anamorphicBlurPass.Value;
-
-        ultimateBloom.m_UseStarFlare = _useStarFlare.Value;
-        ultimateBloom.m_StarFlareIntensity = _starFlareIntensity.Value;
-        ultimateBloom.m_StarScale = _starScale.Value;
-        ultimateBloom.m_StarBlurPass = _starBlurPass.Value;
-    }
-
-    public void ApplyLensDust(UltimateBloom ultimateBloom)
-    {
-        if (_lensDust.Value == null)
-            return;
-
-        var assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-        if (assemblyDirectory == null)
-            return;
-
-        var path = Path.Combine(assemblyDirectory, "bloom", _lensDust.Value);
-
-        if (!File.Exists(path))
-            return;
-
-        var data = File.ReadAllBytes(path);
-        var tex2D = new Texture2D(1920, 1080, TextureFormat.RGBA32, true);
-
-        tex2D.LoadImage(data);
-        ultimateBloom.m_DustTexture = tex2D;
+        StarBlurPass.SettingChanged += OnConfigChanged;
     }
 
     private void OnConfigChanged(object o, EventArgs e)
     {
-        ConfigChanged?.Invoke(this, EventArgs.Empty);
+        Singleton<GraphicsController>.Instance?.UpdateBloomSettings();
     }
 
     private void OnLensDustChanged(object o, EventArgs e)
     {
-        LensDirtChanged?.Invoke(this, EventArgs.Empty);
+        Singleton<GraphicsController>.Instance?.UpdateLensDust();
     }
 }
 
@@ -268,7 +226,7 @@ public class GraphicsConfig
         const string lights = "01. Lights";
 
         LightFlareEnabled = config.Bind(lights, "Env. Light Flares Changes (RESTART)", true, new ConfigDescription(
-            "Makes the environmental light flares more prominent and appropriate. Bright lights have bright flares, dim lights have dim flares.",
+            "Makes the environmental light flares more prominent and appropriate.",
             null,
             new ConfigurationManagerAttributes { Order = 3 }
         ));
@@ -289,8 +247,8 @@ public class GraphicsConfig
 
         AddMapConfig(config, "Default", browsable: false);
         AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
-        AddMapConfig(config, "FactoryDay", tonemapPrimary: new Vector3(25f, -0.4f, 25f));
-        AddMapConfig(config, "FactoryNight", tonemapPrimary: new Vector3(25f, 0f, 25f));
+        AddMapConfig(config, "FactoryDay", true, 10f, tonemapPrimary: new Vector3(20f, -0.4f, 20f), bloomMultiplier: 2f);
+        AddMapConfig(config, "FactoryNight", true, 10f, tonemapPrimary: new Vector3(22.5f, -0.2f, 20f));
         AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
         AddMapConfig(config, "Laboratory", tonemapPrimary: new Vector3(20f, -0.4f, 20f));
         AddMapConfig(config, "Lighthouse", false, 10f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
@@ -309,6 +267,7 @@ public class GraphicsConfig
         Current.TonemapEnabled.SettingChanged -= OnMapSettingsChanged;
         Current.TonemapPrimary.SettingChanged -= OnMapSettingsChanged;
         Current.TonemapSecondary.SettingChanged -= OnMapSettingsChanged;
+        Current.BloomMultiplier.SettingChanged -= OnMapSettingsChanged;
 
         if (!_mapConfigs.TryGetValue(map, out Current))
         {
@@ -320,6 +279,7 @@ public class GraphicsConfig
         Current.TonemapEnabled.SettingChanged += OnMapSettingsChanged;
         Current.TonemapPrimary.SettingChanged += OnMapSettingsChanged;
         Current.TonemapSecondary.SettingChanged += OnMapSettingsChanged;
+        Current.BloomMultiplier.SettingChanged += OnMapSettingsChanged;
     }
 
     public void SetMapConfig(string map, bool enabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f)
@@ -338,7 +298,7 @@ public class GraphicsConfig
     private void AddMapConfig(
         ConfigFile config, string map,
         bool lodEnabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f,
-        bool tonemapEnabled = true, Vector3 tonemapPrimary = default, Vector3 tonemapSecondary = default,
+        bool tonemapEnabled = true, Vector3 tonemapPrimary = default, Vector3 tonemapSecondary = default, float bloomMultiplier = 1f,
         bool browsable = true
     )
     {
@@ -381,6 +341,11 @@ public class GraphicsConfig
             config.Bind(mapSection, $"{map} Secondary Tonemap", tonemapSecondary, new ConfigDescription(
                 "The default camera position offset relative to the first person view (in meters).",
                 tags: new ConfigurationManagerAttributes { Order = 1, Browsable = browsable, IsAdvanced = true}
+            )),
+            config.Bind(mapSection, $"{map} Bloom Mult", bloomMultiplier, new ConfigDescription(
+                "Multiplies the baseline bloom intensity.",
+                new AcceptableValueRange<float>(0.1f, 5f),
+                new ConfigurationManagerAttributes { Order = 0, Browsable = browsable}
             ))
         );
 

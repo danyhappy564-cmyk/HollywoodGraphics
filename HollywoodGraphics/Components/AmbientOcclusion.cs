@@ -3,6 +3,8 @@
 public class AmbientOcclusion
 {
     private readonly HBAO _hbao;
+    private readonly HBAO_Core.AOSettings _defaultAOSettings;
+    private readonly HBAO_Core.ColorBleedingSettings _defaultColorBleedingSettings;
 
     public AmbientOcclusion()
     {
@@ -15,20 +17,34 @@ public class AmbientOcclusion
         }
         
         _hbao = camera.GetComponent<HBAO>();
+        _defaultAOSettings = _hbao.aoSettings;
+        _defaultColorBleedingSettings = _hbao.colorBleedingSettings;
+
+        UpdateSettings();
     }
 
     public void UpdateSettings()
     {
-        var settings = _hbao.aoSettings;
-        settings.intensity = Plugin.GraphicsConfig.AOIntensity.Value;
-        settings.radius =  Plugin.GraphicsConfig.AORadius.Value;
-        settings.bias =  Plugin.GraphicsConfig.AOBias.Value;
-        settings.useMultiBounce = Plugin.GraphicsConfig.AOMultiBounceEnabled.Value;
-        settings.multiBounceInfluence = Plugin.GraphicsConfig.AOMultiBounceInfluence.Value;
-        
-        var colorbleedSettings = _hbao.colorBleedingSettings;
-        colorbleedSettings.enabled = Plugin.GraphicsConfig.AOColorBleedEnabled.Value;
-        colorbleedSettings.saturation = Plugin.GraphicsConfig.AOColorBleedSaturation.Value;
-        colorbleedSettings.albedoMultiplier = Plugin.GraphicsConfig.AOColorBleedAlbedoMul.Value;
+        if (Plugin.GraphicsConfig.AOEnabled.Value)
+        {
+            var settings = _hbao.aoSettings;
+            settings.intensity = Plugin.GraphicsConfig.AOIntensity.Value;
+            settings.radius = Plugin.GraphicsConfig.AORadius.Value;
+            settings.bias = Plugin.GraphicsConfig.AOBias.Value;
+            settings.useMultiBounce = Plugin.GraphicsConfig.AOMultiBounceEnabled.Value;
+            settings.multiBounceInfluence = Plugin.GraphicsConfig.AOMultiBounceInfluence.Value;
+            _hbao.aoSettings = settings;
+
+            var colorbleedSettings = _hbao.colorBleedingSettings;
+            colorbleedSettings.enabled = Plugin.GraphicsConfig.AOColorBleedEnabled.Value;
+            colorbleedSettings.saturation = Plugin.GraphicsConfig.AOColorBleedSaturation.Value;
+            colorbleedSettings.albedoMultiplier = Plugin.GraphicsConfig.AOColorBleedAlbedoMul.Value;
+            _hbao.colorBleedingSettings = colorbleedSettings;
+        }
+        else
+        {
+            _hbao.aoSettings = _defaultAOSettings;
+            _hbao.colorBleedingSettings = _defaultColorBleedingSettings;
+        }
     }
 }

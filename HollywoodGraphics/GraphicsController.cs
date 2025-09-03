@@ -6,14 +6,14 @@ namespace HollywoodGraphics;
 
 public class GraphicsController : MonoBehaviour
 {
-    private Atmosphere _ambientLight;
+    private Atmosphere _atmosphere;
     private Bloom _bloom;
     private Tonemap _tonemap;
     private AmbientOcclusion _ambientOcclusion;
     
     public void Start()
     {
-        _ambientLight = new Atmosphere();
+        _atmosphere = new Atmosphere();
         Plugin.Log.LogInfo("Atmospherics initialized");
         
         _bloom = new Bloom();
@@ -26,7 +26,6 @@ public class GraphicsController : MonoBehaviour
         Plugin.Log.LogInfo("Ambient Occlusion initialized");
         
         UpdateMapSettings();
-        UpdateAmbientOcclusionSettings();
         Plugin.Log.LogInfo($"Updated all settings");
     }
     
@@ -55,6 +54,11 @@ public class GraphicsController : MonoBehaviour
         _bloom.UpdateSettings();
     }
 
+    public void UpdateAtmosphereSettings()
+    {
+        _atmosphere.UpdateSettings();
+    }
+
     public void UpdateAmbientOcclusionSettings()
     {
         _ambientOcclusion.UpdateSettings();
@@ -73,7 +77,7 @@ public class GraphicsController : MonoBehaviour
     private void Update()
     {
         _bloom.Update();
-        _ambientLight.Update();
+        _atmosphere.Update();
     }
 
     private void OnDestroy()

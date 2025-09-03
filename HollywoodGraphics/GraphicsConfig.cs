@@ -30,7 +30,7 @@ public class MapConfig(
     public readonly ConfigEntry<bool> TonemapEnabled = tonemapEnabled;
     public readonly ConfigEntry<Vector3> TonemapPrimary = tonemapPrimary;
     public readonly ConfigEntry<Vector3> TonemapSecondary = tonemapSecondary;
-    
+
     public readonly ConfigEntry<float> BloomMultiplier = bloomMultiplier;
 }
 
@@ -118,7 +118,7 @@ public sealed class BloomConfig
         ));
         LensDust.SettingChanged += OnLensDustChanged;
 
-        DirtLightIntensity = config.Bind(bloomSection, "Lens Bloom Intensity", 1.65f, new ConfigDescription(
+        DirtLightIntensity = config.Bind(bloomSection, "Lens Bloom Intensity", 1f, new ConfigDescription(
             "Controls the intensity of lens bloom.",
             new AcceptableValueRange<float>(0f, 5f),
             new ConfigurationManagerAttributes { Order = 93, IsAdvanced = true }
@@ -196,17 +196,24 @@ public sealed class BloomConfig
 public class GraphicsConfig
 {
     public MapConfig Current;
-    
+
+    public readonly ConfigEntry<bool> AOEnabled;
     public readonly ConfigEntry<float> AOIntensity;
     public readonly ConfigEntry<float> AORadius;
     public readonly ConfigEntry<float> AOBias;
     public readonly ConfigEntry<bool> AOMultiBounceEnabled;
     public readonly ConfigEntry<float> AOMultiBounceInfluence;
-    
+
     public readonly ConfigEntry<bool> AOColorBleedEnabled;
     public readonly ConfigEntry<float> AOColorBleedSaturation;
     public readonly ConfigEntry<float> AOColorBleedAlbedoMul;
-    
+
+    public readonly ConfigEntry<bool> SunColorEnabled;
+    public readonly ConfigEntry<Vector4> SunColor1;
+    public readonly ConfigEntry<Vector4> SunColor2;
+    public readonly ConfigEntry<Vector4> SunColor3;
+    public readonly ConfigEntry<Vector4> SunColor4;
+    public readonly ConfigEntry<Vector4> SunColor5;
     public readonly ConfigEntry<bool> LightFlareEnabled;
     public readonly ConfigEntry<float> LightFlareIntensity;
     public readonly ConfigEntry<float> LightFlareSize;
@@ -236,47 +243,98 @@ public class GraphicsConfig
         const string ao = "01. Ambient Occlusion";
         const string lights = "02. Lights";
 
-        AOIntensity = config.Bind(ao, "AO Intensity", 0.75f, new ConfigDescription(
+        AOEnabled = config.Bind(ao, "AO Override", true, new ConfigDescription(
+            "Override the default AO settings",
+            null,
+            new ConfigurationManagerAttributes { Order = 9 }
+        ));
+        AOEnabled.SettingChanged += OnAmbientOcclusionSettingsChanged;
+        AOIntensity = config.Bind(ao, "AO Intensity", 1.25f, new ConfigDescription(
             "Overall ambient occlusion intensity.",
             new AcceptableValueRange<float>(0f, 2f),
-            new ConfigurationManagerAttributes { Order = 4 }
+            new ConfigurationManagerAttributes { Order = 8 }
         ));
+        AOIntensity.SettingChanged += OnAmbientOcclusionSettingsChanged;
         AORadius = config.Bind(ao, "AO Radius", 1.46f, new ConfigDescription(
             "The distance outside which occluders are ignored.",
             new AcceptableValueRange<float>(0f, 2f),
-            new ConfigurationManagerAttributes { Order = 4 }
+            new ConfigurationManagerAttributes { Order = 7, IsAdvanced = true }
         ));
+        AORadius.SettingChanged += OnAmbientOcclusionSettingsChanged;
         AOBias = config.Bind(ao, "AO Bias", 0.05f, new ConfigDescription(
             "This value allows to scale up the ambient occlusion values.",
             new AcceptableValueRange<float>(0f, 10f),
-            new ConfigurationManagerAttributes { Order = 4 }
+            new ConfigurationManagerAttributes { Order = 6, IsAdvanced = true }
         ));
+        AOBias.SettingChanged += OnAmbientOcclusionSettingsChanged;
         AOMultiBounceEnabled = config.Bind(ao, "AO Offscreen Enabled", true, new ConfigDescription(
             "Toggles whether offscreen samples contribute to the AO.",
             null,
-            new ConfigurationManagerAttributes { Order = 5 }
+            new ConfigurationManagerAttributes { Order = 5, IsAdvanced = true }
         ));
+        AOMultiBounceEnabled.SettingChanged += OnAmbientOcclusionSettingsChanged;
         AOMultiBounceInfluence = config.Bind(ao, "AO Offscreen Influence", 1f, new ConfigDescription(
             "The amount of AO offscreen samples are contributing.",
             new AcceptableValueRange<float>(0f, 1f),
-            new ConfigurationManagerAttributes { Order = 4 }
+            new ConfigurationManagerAttributes { Order = 4, IsAdvanced = true }
         ));
-        
+        AOMultiBounceInfluence.SettingChanged += OnAmbientOcclusionSettingsChanged;
+
         AOColorBleedEnabled = config.Bind(ao, "AO Color Bleed Enabled", true, new ConfigDescription(
             "Toggles color bleeding. Duh.",
             null,
             new ConfigurationManagerAttributes { Order = 3 }
         ));
+        AOColorBleedEnabled.SettingChanged += OnAmbientOcclusionSettingsChanged;
         AOColorBleedSaturation = config.Bind(ao, "AO Color Bleed Saturation", 0.75f, new ConfigDescription(
             "Scales the contribution of the color bleeding samples.",
             new AcceptableValueRange<float>(0f, 1f),
-            new ConfigurationManagerAttributes { Order = 2 }
+            new ConfigurationManagerAttributes { Order = 2, IsAdvanced = true }
         ));
+        AOColorBleedSaturation.SettingChanged += OnAmbientOcclusionSettingsChanged;
         AOColorBleedAlbedoMul = config.Bind(ao, "AO Color Bleed Albedo Mult", 3.2f, new ConfigDescription(
             "Use masking on emissive pixels",
             new AcceptableValueRange<float>(0f, 32f),
             new ConfigurationManagerAttributes { Order = 1 }
         ));
+        AOColorBleedAlbedoMul.SettingChanged += OnAmbientOcclusionSettingsChanged;
+
+        SunColorEnabled = config.Bind(lights, "Ambient Light Override", true, new ConfigDescription(
+            "Toggles whether the ambient light colors are overridden.",
+            null,
+            new ConfigurationManagerAttributes { Order = 9}
+        ));
+        SunColorEnabled.SettingChanged += OnAtmosphereSettingsChanged;
+        SunColor1 = config.Bind(lights, "Ambient Light Color 1", new Vector4(0.35f, 0.4f, 0.5f, 0.32f), new ConfigDescription(
+            "The color of the ambient light. The W field defines the timeline is roughly like this: 0h -> 0.31, 6h -> 0.46, 12h -> 0.9, 18h - 0.76.",
+            null,
+            new ConfigurationManagerAttributes { Order = 8 }
+        ));
+        SunColor1.SettingChanged += OnAtmosphereSettingsChanged;
+        SunColor2 = config.Bind(lights, "Ambient Light Color 2", new Vector4(0.5f, 0.23f, 0.16f, 0.45f), new ConfigDescription(
+            "The color of the ambient light. The W field defines the timeline is roughly like this: 0h -> 0.31, 6h -> 0.46, 12h -> 0.9, 18h - 0.76.",
+            null,
+            new ConfigurationManagerAttributes { Order = 7 }
+        ));
+        SunColor2.SettingChanged += OnAtmosphereSettingsChanged;
+        SunColor3 = config.Bind(lights, "Ambient Light Color 3", new Vector4(0.69f, 0.5f, 0.31f, 0.55f), new ConfigDescription(
+            "The color of the ambient light. The W field defines the timeline is roughly like this: 0h -> 0.31, 6h -> 0.46, 12h -> 0.9, 18h - 0.76.",
+            null,
+            new ConfigurationManagerAttributes { Order = 6 }
+        ));
+        SunColor3.SettingChanged += OnAtmosphereSettingsChanged;
+        SunColor4 = config.Bind(lights, "Ambient Light Color 4", new Vector4(1f, 0.75f, 0.5f, 0.65f), new ConfigDescription(
+            "The color of the ambient light. The W field defines the timeline is roughly like this: 0h -> 0.31, 6h -> 0.46, 12h -> 0.9, 18h - 0.76.",
+            null,
+            new ConfigurationManagerAttributes { Order = 5 }
+        ));
+        SunColor4.SettingChanged += OnAtmosphereSettingsChanged;
+        SunColor5 = config.Bind(lights, "Ambient Light Color 5", new Vector4(1f, 0.9f, 0.8f, 1f), new ConfigDescription(
+            "The color of the ambient light. The W field defines the timeline is roughly like this: 0h -> 0.31, 6h -> 0.46, 12h -> 0.9, 18h - 0.76.",
+            null,
+            new ConfigurationManagerAttributes { Order = 4 }
+        ));
+        SunColor5.SettingChanged += OnAtmosphereSettingsChanged;
         
         LightFlareEnabled = config.Bind(lights, "Env. Light Flares Changes (RESTART)", true, new ConfigDescription(
             "Makes the environmental light flares more prominent and appropriate.",
@@ -298,8 +356,8 @@ public class GraphicsConfig
 
         AddMapConfig(config, "Default", browsable: false);
         AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "FactoryDay", false, 10f, tonemapPrimary: new Vector3(20f, 0f, 20f), bloomMultiplier: 2f);
-        AddMapConfig(config, "FactoryNight", false, 10f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "FactoryDay", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f), bloomMultiplier: 2f);
+        AddMapConfig(config, "FactoryNight", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f));
         AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Laboratory", tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Lighthouse", false, 8f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
@@ -387,16 +445,16 @@ public class GraphicsConfig
             )),
             config.Bind(mapSection, $"{map} Primary Tonemap", tonemapPrimary, new ConfigDescription(
                 "The default camera position offset relative to the first person view (in meters).",
-                tags: new ConfigurationManagerAttributes { Order = 2, Browsable = browsable, IsAdvanced = true }
+                tags: new ConfigurationManagerAttributes { Order = 2, Browsable = browsable }
             )),
             config.Bind(mapSection, $"{map} Secondary Tonemap", tonemapSecondary, new ConfigDescription(
                 "The default camera position offset relative to the first person view (in meters).",
-                tags: new ConfigurationManagerAttributes { Order = 1, Browsable = browsable, IsAdvanced = true}
+                tags: new ConfigurationManagerAttributes { Order = 1, Browsable = browsable, IsAdvanced = true }
             )),
             config.Bind(mapSection, $"{map} Bloom Mult", bloomMultiplier, new ConfigDescription(
                 "Multiplies the baseline bloom intensity.",
                 new AcceptableValueRange<float>(0.1f, 5f),
-                new ConfigurationManagerAttributes { Order = 0, Browsable = browsable}
+                new ConfigurationManagerAttributes { Order = 0, Browsable = browsable, IsAdvanced = true }
             ))
         );
 
@@ -411,8 +469,13 @@ public class GraphicsConfig
         Singleton<GraphicsController>.Instance?.UpdateMapSettings();
     }
 
-    private void OnAmbientOcclusionSettingsChanged(object o, EventArgs e)
+    private static void OnAmbientOcclusionSettingsChanged(object o, EventArgs e)
     {
         Singleton<GraphicsController>.Instance?.UpdateAmbientOcclusionSettings();
+    }
+    
+    private static void OnAtmosphereSettingsChanged(object o, EventArgs e)
+    {
+        Singleton<GraphicsController>.Instance?.UpdateAtmosphereSettings();
     }
 }

@@ -1,4 +1,5 @@
-﻿using BepInEx.Configuration;
+﻿using System.Runtime.CompilerServices;
+using BepInEx.Configuration;
 using EFT.Weather;
 using UnityEngine;
 
@@ -48,6 +49,7 @@ public class Atmosphere
         UpdateSettings();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Update()
     {
         if (_weatherController == null)

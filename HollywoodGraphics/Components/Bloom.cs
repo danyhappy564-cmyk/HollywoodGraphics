@@ -1,6 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using EFT.Weather;
 using UnityEngine;
 
@@ -71,6 +71,7 @@ public class Bloom
         _weatherController = weather.GetComponent<WeatherController>();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Update()
     {
         if (_weatherController == null)

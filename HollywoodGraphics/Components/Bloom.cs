@@ -82,12 +82,11 @@ public class Bloom
             return;
 
         var bloomConfig = Plugin.GraphicsConfig.Bloom;
-        
-        // Decrease streak size at night
-        var streakScale = 1f - 0.5f * nightFactor;
-        _ultimateBloom.m_AnamorphicScale = bloomConfig.AnamorphicScale.Value * streakScale;
-        _ultimateBloom.m_DirtLightIntensity = bloomConfig.DirtLightIntensity.Value * Plugin.GraphicsConfig.Current.BloomMultiplier.Value + nightFactor;
-        _ultimateBloom.m_StarFlareIntensity = bloomConfig.DirtLightIntensity.Value + 0.5f * nightFactor;
+
+        var bias = 0.5f * nightFactor;
+        _ultimateBloom.m_DirtLightIntensity = bloomConfig.DirtLightIntensity.Value * Plugin.GraphicsConfig.Current.BloomMultiplier.Value + bias;
+        _ultimateBloom.m_StarFlareIntensity = bloomConfig.StarFlareIntensity.Value + bias;
+        _ultimateBloom.m_StarScale = Mathf.Max(bloomConfig.StarScale.Value - 2f * nightFactor, 0.5f);
 
         var highlightScaling = 1f + 0.1f * nightFactor;
         _ultimateBloom.SetFilmicCurveParameters(

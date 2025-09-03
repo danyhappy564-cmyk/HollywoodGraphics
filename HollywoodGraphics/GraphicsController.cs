@@ -9,6 +9,7 @@ public class GraphicsController : MonoBehaviour
     private Atmosphere _ambientLight;
     private Bloom _bloom;
     private Tonemap _tonemap;
+    private AmbientOcclusion _ambientOcclusion;
     
     public void Start()
     {
@@ -21,8 +22,12 @@ public class GraphicsController : MonoBehaviour
         _tonemap = new Tonemap();
         Plugin.Log.LogInfo("Tonemap initialized");
         
+        _ambientOcclusion = new AmbientOcclusion();
+        Plugin.Log.LogInfo("Ambient Occlusion initialized");
+        
         UpdateMapSettings();
-        Plugin.Log.LogInfo($"Updated lod bias to {Plugin.GraphicsConfig.Current.LodBias.Value}");
+        UpdateAmbientOcclusionSettings();
+        Plugin.Log.LogInfo($"Updated all settings");
     }
     
     public void UpdateMapSettings()
@@ -48,6 +53,11 @@ public class GraphicsController : MonoBehaviour
         
         // Apply per map bloom stuff
         _bloom.UpdateSettings();
+    }
+
+    public void UpdateAmbientOcclusionSettings()
+    {
+        _ambientOcclusion.UpdateSettings();
     }
 
     public void UpdateBloomSettings()

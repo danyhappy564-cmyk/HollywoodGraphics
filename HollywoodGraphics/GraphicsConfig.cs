@@ -60,7 +60,7 @@ public sealed class BloomConfig
 
     public BloomConfig(ConfigFile config)
     {
-        const string bloomSection = "02. Bloom";
+        const string bloomSection = "03. Bloom";
 
         BloomIntensity = config.Bind(bloomSection, "Master Bloom Intensity", 0.2f, new ConfigDescription(
             "Controls the overall intensity of the bloom effect.",
@@ -139,7 +139,7 @@ public sealed class BloomConfig
         ));
         AnamorphicFlareIntensity.SettingChanged += OnConfigChanged;
 
-        AnamorphicScale = config.Bind(bloomSection, "Anamorphic Flare Scale", 10f, new ConfigDescription(
+        AnamorphicScale = config.Bind(bloomSection, "Anamorphic Flare Scale", 5f, new ConfigDescription(
             "Scaling factor for anamorphic flares.",
             new AcceptableValueRange<float>(0, 20),
             new ConfigurationManagerAttributes { Order = 82 }
@@ -167,7 +167,7 @@ public sealed class BloomConfig
         ));
         StarFlareIntensity.SettingChanged += OnConfigChanged;
 
-        StarScale = config.Bind(bloomSection, "Star Flare Scale", 5f, new ConfigDescription(
+        StarScale = config.Bind(bloomSection, "Star Flare Scale", 4f, new ConfigDescription(
             "Scaling factor for star flares.",
             new AcceptableValueRange<float>(0f, 20f),
             new ConfigurationManagerAttributes { Order = 77 }
@@ -182,12 +182,12 @@ public sealed class BloomConfig
         StarBlurPass.SettingChanged += OnConfigChanged;
     }
 
-    private void OnConfigChanged(object o, EventArgs e)
+    private static void OnConfigChanged(object o, EventArgs e)
     {
         Singleton<GraphicsController>.Instance?.UpdateBloomSettings();
     }
 
-    private void OnLensDustChanged(object o, EventArgs e)
+    private static void OnLensDustChanged(object o, EventArgs e)
     {
         Singleton<GraphicsController>.Instance?.UpdateLensDust();
     }
@@ -196,7 +196,17 @@ public sealed class BloomConfig
 public class GraphicsConfig
 {
     public MapConfig Current;
-
+    
+    public readonly ConfigEntry<float> AOIntensity;
+    public readonly ConfigEntry<float> AORadius;
+    public readonly ConfigEntry<float> AOBias;
+    public readonly ConfigEntry<bool> AOMultiBounceEnabled;
+    public readonly ConfigEntry<float> AOMultiBounceInfluence;
+    
+    public readonly ConfigEntry<bool> AOColorBleedEnabled;
+    public readonly ConfigEntry<float> AOColorBleedSaturation;
+    public readonly ConfigEntry<float> AOColorBleedAlbedoMul;
+    
     public readonly ConfigEntry<bool> LightFlareEnabled;
     public readonly ConfigEntry<float> LightFlareIntensity;
     public readonly ConfigEntry<float> LightFlareSize;
@@ -223,20 +233,61 @@ public class GraphicsConfig
 
     public GraphicsConfig(ConfigFile config)
     {
-        const string lights = "01. Lights";
+        const string ao = "01. Ambient Occlusion";
+        const string lights = "02. Lights";
 
+        AOIntensity = config.Bind(ao, "AO Intensity", 0.75f, new ConfigDescription(
+            "Overall ambient occlusion intensity.",
+            new AcceptableValueRange<float>(0f, 2f),
+            new ConfigurationManagerAttributes { Order = 4 }
+        ));
+        AORadius = config.Bind(ao, "AO Radius", 1.46f, new ConfigDescription(
+            "The distance outside which occluders are ignored.",
+            new AcceptableValueRange<float>(0f, 2f),
+            new ConfigurationManagerAttributes { Order = 4 }
+        ));
+        AOBias = config.Bind(ao, "AO Bias", 0.05f, new ConfigDescription(
+            "This value allows to scale up the ambient occlusion values.",
+            new AcceptableValueRange<float>(0f, 10f),
+            new ConfigurationManagerAttributes { Order = 4 }
+        ));
+        AOMultiBounceEnabled = config.Bind(ao, "AO Offscreen Enabled", true, new ConfigDescription(
+            "Toggles whether offscreen samples contribute to the AO.",
+            null,
+            new ConfigurationManagerAttributes { Order = 5 }
+        ));
+        AOMultiBounceInfluence = config.Bind(ao, "AO Offscreen Influence", 1f, new ConfigDescription(
+            "The amount of AO offscreen samples are contributing.",
+            new AcceptableValueRange<float>(0f, 1f),
+            new ConfigurationManagerAttributes { Order = 4 }
+        ));
+        
+        AOColorBleedEnabled = config.Bind(ao, "AO Color Bleed Enabled", true, new ConfigDescription(
+            "Toggles color bleeding. Duh.",
+            null,
+            new ConfigurationManagerAttributes { Order = 3 }
+        ));
+        AOColorBleedSaturation = config.Bind(ao, "AO Color Bleed Saturation", 0.75f, new ConfigDescription(
+            "Scales the contribution of the color bleeding samples.",
+            new AcceptableValueRange<float>(0f, 1f),
+            new ConfigurationManagerAttributes { Order = 2 }
+        ));
+        AOColorBleedAlbedoMul = config.Bind(ao, "AO Color Bleed Albedo Mult", 3.2f, new ConfigDescription(
+            "Use masking on emissive pixels",
+            new AcceptableValueRange<float>(0f, 32f),
+            new ConfigurationManagerAttributes { Order = 1 }
+        ));
+        
         LightFlareEnabled = config.Bind(lights, "Env. Light Flares Changes (RESTART)", true, new ConfigDescription(
             "Makes the environmental light flares more prominent and appropriate.",
             null,
             new ConfigurationManagerAttributes { Order = 3 }
         ));
-
         LightFlareIntensity = config.Bind(lights, "Env. Light Flare Intensity (RESTART)", 1f, new ConfigDescription(
             "Adjusts the intensity of environment light lens flares. Yes, I identify as a Hasselblad H6D-400C camera, thank you.",
             new AcceptableValueRange<float>(0f, 10f),
             new ConfigurationManagerAttributes { Order = 2 }
         ));
-
         LightFlareSize = config.Bind(lights, "Env. Light Flare Size (RESTART)", 1f, new ConfigDescription(
             "Adjusts the size of environment light lens flares. Yes, I identify as a Hasselblad H6D-400C camera, thank you.",
             new AcceptableValueRange<float>(0f, 10f),
@@ -246,17 +297,17 @@ public class GraphicsConfig
         Bloom = new BloomConfig(config);
 
         AddMapConfig(config, "Default", browsable: false);
-        AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
-        AddMapConfig(config, "FactoryDay", true, 10f, tonemapPrimary: new Vector3(20f, -0.4f, 20f), bloomMultiplier: 2f);
-        AddMapConfig(config, "FactoryNight", true, 10f, tonemapPrimary: new Vector3(22.5f, -0.2f, 20f));
-        AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
-        AddMapConfig(config, "Laboratory", tonemapPrimary: new Vector3(20f, -0.4f, 20f));
-        AddMapConfig(config, "Lighthouse", false, 10f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
-        AddMapConfig(config, "Reserve", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
-        AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(25f, -0.4f, 25f));
-        AddMapConfig(config, "Shoreline", false, 10f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
-        AddMapConfig(config, "Streets", tonemapPrimary: new Vector3(25f, -0.4f, 25f));
-        AddMapConfig(config, "Woods", false, 10f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, -0.4f, 20f));
+        AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "FactoryDay", false, 10f, tonemapPrimary: new Vector3(20f, 0f, 20f), bloomMultiplier: 2f);
+        AddMapConfig(config, "FactoryNight", false, 10f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Laboratory", tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Lighthouse", false, 8f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Reserve", false, 8f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(25f, 0f, 25f));
+        AddMapConfig(config, "Shoreline", false, 8f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Streets", tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Woods", false, 8f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
 
         Current = _mapConfigs["default"];
     }
@@ -305,7 +356,7 @@ public class GraphicsConfig
         if (tonemapSecondary == default)
             tonemapSecondary = new Vector3(0f, 1f, 0f);
 
-        var mapSection = $"03. Map: {map}";
+        var mapSection = $"04. Map: {map}";
 
         var overrides = new MapConfig(
             map,
@@ -358,5 +409,10 @@ public class GraphicsConfig
     private static void OnMapSettingsChanged(object o, EventArgs e)
     {
         Singleton<GraphicsController>.Instance?.UpdateMapSettings();
+    }
+
+    private void OnAmbientOcclusionSettingsChanged(object o, EventArgs e)
+    {
+        Singleton<GraphicsController>.Instance?.UpdateAmbientOcclusionSettings();
     }
 }

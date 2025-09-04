@@ -24,6 +24,17 @@ public static class ConfigurationTemplates
     {
         // First reset to the defaults
         SetDefaults(mainConfig);
+        
+        Plugin.GraphicsConfig.SetMapConfig("Customs", true, 1f, 0.5f, 0.5f);
+        Plugin.GraphicsConfig.SetMapConfig("FactoryDay", true, 1f, 0.5f, 0.5f);
+        Plugin.GraphicsConfig.SetMapConfig("FactoryNight", true, 1f, 0.5f, 0.5f);
+        Plugin.GraphicsConfig.SetMapConfig("Interchange", true, 1f, 0.5f, 0.5f);
+        Plugin.GraphicsConfig.SetMapConfig("Lighthouse", true, 1f, 0.5f, 0.5f);
+        Plugin.GraphicsConfig.SetMapConfig("Reserve", true, 1f, 0.5f, 0.5f);
+        Plugin.GraphicsConfig.SetMapConfig("GroundZero", true, 1f, 0.5f, 0.5f);
+        Plugin.GraphicsConfig.SetMapConfig("Shoreline", true, 1f, 0.5f, 0.5f);
+        Plugin.GraphicsConfig.SetMapConfig("Streets", true, 1f, 0.25f, 0.25f);
+        Plugin.GraphicsConfig.SetMapConfig("Woods", true, 1f, 0.5f, 0.5f);
     }
     
     public static void SetDefaults(ConfigFile mainConfig)

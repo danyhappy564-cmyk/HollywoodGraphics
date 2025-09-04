@@ -353,23 +353,29 @@ public class GraphicsConfig
         ));
 
         Bloom = new BloomConfig(config);
-
-        AddMapConfig(config, "Default", browsable: false);
+        
+        config.Bind("04. General", "Brightness Preset", "", new ConfigDescription(
+            "Apply a brightness preset.",
+            null,
+            new ConfigurationManagerAttributes { Order = 1, CustomDrawer = ScreenPresetDrawer }
+        ));
+        
+        AddMapConfig(config, "Default", browsable: false, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "FactoryDay", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f), bloomMultiplier: 2f);
         AddMapConfig(config, "FactoryNight", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f));
         AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Laboratory", tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Lighthouse", false, 8f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Reserve", false, 8f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Lighthouse", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Reserve", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(25f, 0f, 25f));
-        AddMapConfig(config, "Shoreline", false, 8f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Shoreline", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Streets", tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Woods", false, 8f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Woods", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
 
         Current = _mapConfigs["default"];
     }
-
+    
     public void SetCurrentMap(string map)
     {
         Current.LodBias.SettingChanged -= OnMapSettingsChanged;
@@ -464,6 +470,37 @@ public class GraphicsConfig
         }
     }
 
+    private void ScreenPresetDrawer(ConfigEntryBase entry)
+    {
+        if (GUILayout.Button("OLED"))
+        {
+            foreach (var mapConfig in _mapConfigs.Values)
+            {
+                var tonemap = (Vector3)mapConfig.TonemapPrimary.DefaultValue;
+                tonemap.y += 0.8f;
+                mapConfig.TonemapPrimary.Value = tonemap;
+            }
+        }
+        
+        if (GUILayout.Button("Dark"))
+        {
+            foreach (var mapConfig in _mapConfigs.Values)
+            {
+                var tonemap = (Vector3)mapConfig.TonemapPrimary.DefaultValue;
+                tonemap.y -= 0.4f;
+                mapConfig.TonemapPrimary.Value = tonemap;
+            }
+        }
+        
+        if (GUILayout.Button("Default"))
+        {
+            foreach (var mapConfig in _mapConfigs.Values)
+            {
+                mapConfig.TonemapPrimary.Value = (Vector3)mapConfig.TonemapPrimary.DefaultValue;
+            }
+        }
+    }
+    
     private static void OnMapSettingsChanged(object o, EventArgs e)
     {
         Singleton<GraphicsController>.Instance?.UpdateMapSettings();

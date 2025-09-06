@@ -249,7 +249,7 @@ public class GraphicsConfig
             new ConfigurationManagerAttributes { Order = 9 }
         ));
         AOEnabled.SettingChanged += OnAmbientOcclusionSettingsChanged;
-        AOIntensity = config.Bind(ao, "AO Intensity", 1.25f, new ConfigDescription(
+        AOIntensity = config.Bind(ao, "AO Intensity", 1.5f, new ConfigDescription(
             "Overall ambient occlusion intensity.",
             new AcceptableValueRange<float>(0f, 2f),
             new ConfigurationManagerAttributes { Order = 8 }

@@ -19,6 +19,8 @@ public class Plugin : BaseUnityPlugin
 
     private static ConfigEntry<bool> _loggingEnabled;
 
+    public static ConfigEntry<float> lensDustIntensity => GraphicsConfig.Bloom.DustIntensity;
+
     private void Awake()
     {
         Log = Logger;

@@ -1,5 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using BepInEx;
+using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using UnityEngine;
@@ -12,25 +14,40 @@ namespace HollywoodGraphics;
 public class Plugin : BaseUnityPlugin
 {
     public const string HollywoodGraphicsVersion = "1.0.0";
-
     public static ManualLogSource Log;
 
     public static GraphicsConfig GraphicsConfig;
-
     private static ConfigEntry<bool> _loggingEnabled;
-
+    private static bool _amandsDetected;
+    
     public static ConfigEntry<float> lensDustIntensity => GraphicsConfig.Bloom.DustIntensity;
 
     private void Awake()
     {
         Log = Logger;
+        StartCoroutine(DelayedLoad());
+    }
 
+    private IEnumerator DelayedLoad()
+    {
+        // We wait for 5 seconds to allow all the 500 shonky mods (incl. this one) an average user installs to load 
+        yield return new WaitForSeconds(5);
+        
+        if (Chainloader.PluginInfos.ContainsKey("com.Amanda.Graphics"))
+        {
+            Log.LogInfo("Amand's Graphics Mod detected, disabling HollywoodGraphics!");
+            _amandsDetected = true;
+        }
+        
         SetupConfig();
 
-        new LampControllerAwakePostfixPatch().Enable();
-        new GraphicsRaidInitPatch().Enable();
-        new GraphicsControllerInitPatch().Enable();
-        new TerrainDetailOverridePatch().Enable();
+        if (!_amandsDetected)
+        {
+            new LampControllerAwakePostfixPatch().Enable();
+            new GraphicsRaidInitPatch().Enable();
+            new GraphicsControllerInitPatch().Enable();
+            new TerrainDetailOverridePatch().Enable();
+        }
 
         Log.LogInfo("Initialization finished");
 
@@ -42,24 +59,31 @@ public class Plugin : BaseUnityPlugin
         {
             Log.LogInfo("Logging disabled");
             BepInEx.Logging.Logger.Sources.Remove(Log);
-        };
+        }
     }
 
     private static void LoadTemplateDrawer(ConfigEntryBase entry)
     {
-        if (GUILayout.Button("Janky's Special"))
+        if (_amandsDetected)
         {
-            ConfigurationTemplates.SetJanky(entry.ConfigFile);
+            GUILayout.TextArea("Amand's Graphics mod detected, HollywoodGraphics disabled!");
         }
-
-        if (GUILayout.Button("Potato"))
+        else
         {
-            ConfigurationTemplates.SetPotato(entry.ConfigFile);
-        }
+            if (GUILayout.Button("Janky's Special"))
+            {
+                ConfigurationTemplates.SetJanky(entry.ConfigFile);
+            }
 
-        if (GUILayout.Button("Defaults"))
-        {
-            ConfigurationTemplates.SetDefaults(entry.ConfigFile);
+            if (GUILayout.Button("Potato"))
+            {
+                ConfigurationTemplates.SetPotato(entry.ConfigFile);
+            }
+
+            if (GUILayout.Button("Defaults"))
+            {
+                ConfigurationTemplates.SetDefaults(entry.ConfigFile);
+            }            
         }
     }
 
@@ -81,6 +105,21 @@ public class Plugin : BaseUnityPlugin
          * Graphics
          */
         GraphicsConfig = new GraphicsConfig(Config);
+
+        // Turn everything readonly if Amand's is detected to avoid conflicts
+        if (_amandsDetected)
+        {
+            foreach (var pair in Config)
+            {
+                foreach (var configTag in pair.Value.Description.Tags)
+                {
+                    if (configTag is ConfigurationManagerAttributes configAttrs)
+                    {
+                        configAttrs.ReadOnly = true;
+                    }
+                }
+            }
+        }
         
         /*
          * Deboog

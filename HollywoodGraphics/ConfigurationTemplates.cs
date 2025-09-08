@@ -24,6 +24,14 @@ public static class ConfigurationTemplates
     {
         // First reset to the defaults
         SetDefaults(mainConfig);
+
+        Plugin.GraphicsConfig.Bloom.UseLensDust.Value = false;
+        Plugin.GraphicsConfig.Bloom.UseAnamorphicFlare.Value = false;
+        Plugin.GraphicsConfig.Bloom.UseStarFlare.Value = false;
+
+        Plugin.GraphicsConfig.AOIntensity.Value = 0.75f;
+        Plugin.GraphicsConfig.AOMultiBounceEnabled.Value = false;
+        Plugin.GraphicsConfig.AOColorBleedEnabled.Value = false;
         
         Plugin.GraphicsConfig.SetMapConfig("Customs", true, 1f, 0.5f, 0.5f);
         Plugin.GraphicsConfig.SetMapConfig("FactoryDay", true, 1f, 0.5f, 0.5f);

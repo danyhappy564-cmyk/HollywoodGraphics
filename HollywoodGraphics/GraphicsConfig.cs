@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using BepInEx.Configuration;
 using Comfort.Common;
 using UnityEngine;
@@ -15,6 +13,8 @@ public class MapConfig(
     ConfigEntry<float> detailDistance,
     ConfigEntry<float> detailDensity,
     ConfigEntry<bool> tonemapEnabled,
+    ConfigEntry<float> tonemapBrightness,
+    ConfigEntry<float> tonemapContrast,
     ConfigEntry<Vector3> tonemapPrimary,
     ConfigEntry<Vector3> tonemapSecondary,
     ConfigEntry<float> bloomMultiplier
@@ -28,6 +28,8 @@ public class MapConfig(
     public readonly ConfigEntry<float> DetailDensity = detailDensity;
 
     public readonly ConfigEntry<bool> TonemapEnabled = tonemapEnabled;
+    public readonly ConfigEntry<float> TonemapBrightness = tonemapBrightness;
+    public readonly ConfigEntry<float> TonemapContrast = tonemapContrast;
     public readonly ConfigEntry<Vector3> TonemapPrimary = tonemapPrimary;
     public readonly ConfigEntry<Vector3> TonemapSecondary = tonemapSecondary;
 
@@ -354,8 +356,8 @@ public class GraphicsConfig
 
         Bloom = new BloomConfig(config);
         
-        config.Bind("04. General", "Brightness Preset", "", new ConfigDescription(
-            "Apply a brightness preset.",
+        config.Bind("04. General", "Brightness & Contrast Preset", "", new ConfigDescription(
+            "Apply a brightness & contrast preset.",
             null,
             new ConfigurationManagerAttributes { Order = 1, CustomDrawer = ScreenPresetDrawer }
         ));
@@ -368,7 +370,7 @@ public class GraphicsConfig
         AddMapConfig(config, "Laboratory", tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Lighthouse", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Reserve", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(25f, 0f, 25f));
+        AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Shoreline", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Streets", tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Woods", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
@@ -380,6 +382,8 @@ public class GraphicsConfig
     {
         Current.LodBias.SettingChanged -= OnMapSettingsChanged;
         Current.TonemapEnabled.SettingChanged -= OnMapSettingsChanged;
+        Current.TonemapBrightness.SettingChanged -= OnMapSettingsChanged;
+        Current.TonemapContrast.SettingChanged -= OnMapSettingsChanged;
         Current.TonemapPrimary.SettingChanged -= OnMapSettingsChanged;
         Current.TonemapSecondary.SettingChanged -= OnMapSettingsChanged;
         Current.BloomMultiplier.SettingChanged -= OnMapSettingsChanged;
@@ -392,6 +396,8 @@ public class GraphicsConfig
 
         Current.LodBias.SettingChanged += OnMapSettingsChanged;
         Current.TonemapEnabled.SettingChanged += OnMapSettingsChanged;
+        Current.TonemapBrightness.SettingChanged += OnMapSettingsChanged;
+        Current.TonemapContrast.SettingChanged += OnMapSettingsChanged;
         Current.TonemapPrimary.SettingChanged += OnMapSettingsChanged;
         Current.TonemapSecondary.SettingChanged += OnMapSettingsChanged;
         Current.BloomMultiplier.SettingChanged += OnMapSettingsChanged;
@@ -427,31 +433,41 @@ public class GraphicsConfig
             config.Bind(mapSection, $"{map} Enable LOD", lodEnabled, new ConfigDescription(
                 "Toggles whether the LOD settings should be overridden at all.",
                 null,
-                new ConfigurationManagerAttributes { Order = 7, Browsable = browsable }
+                new ConfigurationManagerAttributes { Order = 9, Browsable = browsable }
             )),
             config.Bind(mapSection, $"{map} LOD Bias", lodBias, new ConfigDescription(
                 "Adjust the LOD bias in a wider range than what the game allows.",
                 new AcceptableValueRange<float>(1f, 20f),
-                new ConfigurationManagerAttributes { Order = 6, Browsable = browsable }
+                new ConfigurationManagerAttributes { Order = 8, Browsable = browsable }
             )),
             config.Bind(mapSection, $"{map} Detail Cull", detailDistance, new ConfigDescription(
                 "Scales the maximum visible distance for detail like rocks, debris and foliage.",
                 new AcceptableValueRange<float>(0.5f, 10f),
-                new ConfigurationManagerAttributes { Order = 5, Browsable = browsable, IsAdvanced = true }
+                new ConfigurationManagerAttributes { Order = 7, Browsable = browsable, IsAdvanced = true }
             )),
             config.Bind(mapSection, $"{map} Detail Density", detailDensityScaling, new ConfigDescription(
                 "Scales the density of detail like rocks, debris and foliage.",
                 new AcceptableValueRange<float>(0.5f, 5f),
-                new ConfigurationManagerAttributes { Order = 4, Browsable = browsable, IsAdvanced = true }
+                new ConfigurationManagerAttributes { Order = 6, Browsable = browsable, IsAdvanced = true }
             )),
             config.Bind(mapSection, $"{map} Enable Tonemap", tonemapEnabled, new ConfigDescription(
                 "Toggles overriding the tonemap.",
                 null,
-                new ConfigurationManagerAttributes { Order = 3, Browsable = browsable }
+                new ConfigurationManagerAttributes { Order = 5, Browsable = browsable }
+            )),
+            config.Bind(mapSection, $"{map} Brightness", 0f, new ConfigDescription(
+                "The default camera position offset relative to the first person view (in meters).",
+                new AcceptableValueRange<float>(-5f, 5f),
+                tags: new ConfigurationManagerAttributes { Order = 4, Browsable = browsable}
+            )),
+            config.Bind(mapSection, $"{map} Contrast", 0f, new ConfigDescription(
+                "The default camera position offset relative to the first person view (in meters).",
+                new AcceptableValueRange<float>(-15f, 15f),
+                tags: new ConfigurationManagerAttributes { Order = 3, Browsable = browsable}
             )),
             config.Bind(mapSection, $"{map} Primary Tonemap", tonemapPrimary, new ConfigDescription(
                 "The default camera position offset relative to the first person view (in meters).",
-                tags: new ConfigurationManagerAttributes { Order = 2, Browsable = browsable }
+                tags: new ConfigurationManagerAttributes { Order = 2, Browsable = browsable, IsAdvanced = true }
             )),
             config.Bind(mapSection, $"{map} Secondary Tonemap", tonemapSecondary, new ConfigDescription(
                 "The default camera position offset relative to the first person view (in meters).",
@@ -472,13 +488,12 @@ public class GraphicsConfig
 
     private void ScreenPresetDrawer(ConfigEntryBase entry)
     {
-        if (GUILayout.Button("OLED"))
+        if (GUILayout.Button("Bright"))
         {
             foreach (var mapConfig in _mapConfigs.Values)
             {
-                var tonemap = (Vector3)mapConfig.TonemapPrimary.DefaultValue;
-                tonemap.y += 0.8f;
-                mapConfig.TonemapPrimary.Value = tonemap;
+                mapConfig.TonemapBrightness.Value = (float)mapConfig.TonemapBrightness.DefaultValue + 0.5f;
+                mapConfig.TonemapContrast.Value = (float)mapConfig.TonemapContrast.DefaultValue - 5f;
             }
         }
         
@@ -486,9 +501,7 @@ public class GraphicsConfig
         {
             foreach (var mapConfig in _mapConfigs.Values)
             {
-                var tonemap = (Vector3)mapConfig.TonemapPrimary.DefaultValue;
-                tonemap.y -= 0.4f;
-                mapConfig.TonemapPrimary.Value = tonemap;
+                mapConfig.TonemapBrightness.Value = (float)mapConfig.TonemapBrightness.DefaultValue - 0.4f;
             }
         }
         
@@ -496,7 +509,8 @@ public class GraphicsConfig
         {
             foreach (var mapConfig in _mapConfigs.Values)
             {
-                mapConfig.TonemapPrimary.Value = (Vector3)mapConfig.TonemapPrimary.DefaultValue;
+                mapConfig.TonemapBrightness.Value = (float)mapConfig.TonemapBrightness.DefaultValue;
+                mapConfig.TonemapContrast.Value = (float)mapConfig.TonemapContrast.DefaultValue;
             }
         }
     }

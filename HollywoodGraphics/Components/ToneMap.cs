@@ -34,7 +34,11 @@ public class Tonemap
     {
         _cc.enabled = false;
         _prism.tonemapType = TonemapType.ACES;
-        _prism.toneValues = Plugin.GraphicsConfig.Current.TonemapPrimary.Value;
+        
+        var brightness = new Vector3(0f, Plugin.GraphicsConfig.Current.TonemapBrightness.Value, 0f);
+        var contrast = new Vector3(-0.5f * Plugin.GraphicsConfig.Current.TonemapContrast.Value, 0f, -Plugin.GraphicsConfig.Current.TonemapContrast.Value);
+        
+        _prism.toneValues = Plugin.GraphicsConfig.Current.TonemapPrimary.Value + brightness + contrast;
         _prism.secondaryToneValues = Plugin.GraphicsConfig.Current.TonemapSecondary.Value;
     }
 

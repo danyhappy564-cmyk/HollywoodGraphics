@@ -118,7 +118,7 @@ public sealed class BloomConfig
         ));
         LensDust.SettingChanged += OnLensDustChanged;
 
-        DirtLightIntensity = config.Bind(bloomSection, "Lens Bloom Intensity", 1f, new ConfigDescription(
+        DirtLightIntensity = config.Bind(bloomSection, "Lens Bloom Scale", 0.5f, new ConfigDescription(
             "Controls the intensity of lens bloom.",
             new AcceptableValueRange<float>(0f, 5f),
             new ConfigurationManagerAttributes { Order = 93, IsAdvanced = true }
@@ -139,7 +139,7 @@ public sealed class BloomConfig
         ));
         AnamorphicFlareIntensity.SettingChanged += OnConfigChanged;
 
-        AnamorphicScale = config.Bind(bloomSection, "Anamorphic Flare Scale", 5f, new ConfigDescription(
+        AnamorphicScale = config.Bind(bloomSection, "Anamorphic Flare Size", 1.5f, new ConfigDescription(
             "Scaling factor for anamorphic flares.",
             new AcceptableValueRange<float>(0, 20),
             new ConfigurationManagerAttributes { Order = 82 }
@@ -167,7 +167,7 @@ public sealed class BloomConfig
         ));
         StarFlareIntensity.SettingChanged += OnConfigChanged;
 
-        StarScale = config.Bind(bloomSection, "Star Flare Scale", 4f, new ConfigDescription(
+        StarScale = config.Bind(bloomSection, "Star Flare Size", 3f, new ConfigDescription(
             "Scaling factor for star flares.",
             new AcceptableValueRange<float>(0f, 20f),
             new ConfigurationManagerAttributes { Order = 77 }

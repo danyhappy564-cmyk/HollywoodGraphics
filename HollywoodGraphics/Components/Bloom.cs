@@ -36,7 +36,7 @@ public class Bloom
 
         _ultimateBloom.m_IntensityManagement = UltimateBloom.BloomIntensityManagement.FilmicCurve;
         _ultimateBloom.m_SamplingMode = UltimateBloom.SamplingMode.HeightRelative;
-        _ultimateBloom.m_SamplingMinHeight = 768;
+        _ultimateBloom.m_SamplingMinHeight = 384;
         // Reduces flicker
         _ultimateBloom.m_AnamorphicSmallVerticalBlur = true;
 

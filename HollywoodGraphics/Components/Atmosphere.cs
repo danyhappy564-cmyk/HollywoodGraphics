@@ -28,7 +28,7 @@ public class Atmosphere
         _weatherController.TOD_Sky_0.Sun.MeshBrightness = 10f;
         _weatherController.TOD_Sky_0.Moon.MeshSize = 0.5f;
         _weatherController.TOD_Sky_0.Moon.HaloSize = 0.5f;
-        _weatherController.TOD_Sky_0.Moon.MeshBrightness = 2f;
+        _weatherController.TOD_Sky_0.Moon.MeshBrightness = 2.5f;
         _weatherController.TOD_Sky_0.Moon.HaloColor = new Gradient()
         {
             alphaKeys =
@@ -47,23 +47,6 @@ public class Atmosphere
         // _weatherController.TimeOfDayController.ScatteringBrightnessMultiplier = 0.75f;
 
         UpdateSettings();
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Update()
-    {
-        if (_weatherController == null)
-            return;
-        
-        if (_timer <= 0)
-        {
-            // Force this value again since *some mods* modify this in a way that's tricky to bypass
-            _weatherController.TOD_Sky_0.Sun.MeshBrightness = 10f;
-            
-            _timer = RepeatRate;
-        }
-
-        _timer -= Time.deltaTime;
     }
 
     public void UpdateSettings()

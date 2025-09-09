@@ -77,7 +77,6 @@ public class GraphicsController : MonoBehaviour
     private void Update()
     {
         _bloom.Update();
-        _atmosphere.Update();
     }
 
     private void OnDestroy()

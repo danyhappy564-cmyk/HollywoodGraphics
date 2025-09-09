@@ -29,7 +29,7 @@ public static class ConfigurationTemplates
         Plugin.GraphicsConfig.SetMapConfig("Shoreline", true, 8f, 2.5f, 2f);
         Plugin.GraphicsConfig.SetMapConfig("Woods", true, 8f, 2.5f, 2f);
 
-        Plugin.GraphicsConfig.EnableTonemaps();
+        Plugin.GraphicsConfig.ToggleTonemaps(true);
     }
 
     public static void SetPotato(ConfigFile mainConfig)
@@ -55,6 +55,24 @@ public static class ConfigurationTemplates
         Plugin.GraphicsConfig.SetMapConfig("Shoreline", true, 1f, 0.5f, 0.5f);
         Plugin.GraphicsConfig.SetMapConfig("Streets", true, 1f, 0.25f, 0.25f);
         Plugin.GraphicsConfig.SetMapConfig("Woods", true, 1f, 0.5f, 0.5f);
+    }
+
+    public static void SetDisabled(ConfigFile mainConfig)
+    {
+        // First reset to the defaults
+        SetDefaults(mainConfig);
+        
+        Plugin.GraphicsConfig.Bloom.UseLensDust.Value = false;
+        Plugin.GraphicsConfig.Bloom.UseAnamorphicFlare.Value = false;
+        Plugin.GraphicsConfig.Bloom.UseStarFlare.Value = false;
+
+        Plugin.GraphicsConfig.AOEnabled.Value = false;
+        Plugin.GraphicsConfig.AOMultiBounceEnabled.Value = false;
+        Plugin.GraphicsConfig.AOColorBleedEnabled.Value = false;
+
+        Plugin.GraphicsConfig.SunColorEnabled.Value = false;
+        
+        Plugin.GraphicsConfig.ToggleTonemaps(false);
     }
     
     public static void SetDefaults(ConfigFile mainConfig)

@@ -313,7 +313,7 @@ public class GraphicsConfig
             new ConfigurationManagerAttributes { Order = 8 }
         ));
         SunColor1.SettingChanged += OnAtmosphereSettingsChanged;
-        SunColor2 = config.Bind(lights, "Ambient Light Color 2", new Vector4(0.5f, 0.23f, 0.16f, 0.45f), new ConfigDescription(
+        SunColor2 = config.Bind(lights, "Ambient Light Color 2", new Vector4(0.125f, 0.06f, 0.04f, 0.45f), new ConfigDescription(
             "The color of the ambient light. The W field defines the timeline is roughly like this: 0h -> 0.31, 6h -> 0.46, 12h -> 0.9, 18h - 0.76.",
             null,
             new ConfigurationManagerAttributes { Order = 7 }

@@ -74,10 +74,10 @@ public class Plugin : BaseUnityPlugin
             {
                 ConfigurationTemplates.SetJanky(entry.ConfigFile);
             }
-
-            if (GUILayout.Button("Potato"))
+            
+            if (GUILayout.Button("Disable Everything"))
             {
-                ConfigurationTemplates.SetPotato(entry.ConfigFile);
+                ConfigurationTemplates.SetDisabled(entry.ConfigFile);
             }
 
             if (GUILayout.Button("Defaults"))
@@ -96,7 +96,7 @@ public class Plugin : BaseUnityPlugin
          * General
          */
         Config.Bind(general, "Load Template (RESTART)", "", new ConfigDescription(
-            "Use a preset template for the HFX settings. Requires restarting the game to ensure all the settings take effect.",
+            "Use a preset template for the settings. Requires restarting the game to ensure all the settings take effect.",
             null,
             new ConfigurationManagerAttributes { Order = 1, CustomDrawer = LoadTemplateDrawer }
         ));

@@ -245,7 +245,7 @@ public class GraphicsConfig
         const string ao = "01. Ambient Occlusion";
         const string lights = "02. Lights";
 
-        AOEnabled = config.Bind(ao, "AO Override", true, new ConfigDescription(
+        AOEnabled = config.Bind(ao, "AO Override", false, new ConfigDescription(
             "Override the default AO settings",
             null,
             new ConfigurationManagerAttributes { Order = 9 }
@@ -301,7 +301,7 @@ public class GraphicsConfig
         ));
         AOColorBleedAlbedoMul.SettingChanged += OnAmbientOcclusionSettingsChanged;
 
-        SunColorEnabled = config.Bind(lights, "Ambient Light Override", true, new ConfigDescription(
+        SunColorEnabled = config.Bind(lights, "Ambient Light Override", false, new ConfigDescription(
             "Toggles whether the ambient light colors are overridden.",
             null,
             new ConfigurationManagerAttributes { Order = 9}
@@ -356,8 +356,8 @@ public class GraphicsConfig
 
         Bloom = new BloomConfig(config);
         
-        config.Bind("04. General", "Brightness & Contrast Preset", "", new ConfigDescription(
-            "Apply a brightness & contrast preset.",
+        config.Bind("04. General", "Tonemap Preset", "", new ConfigDescription(
+            "Apply a tonemap preset.",
             null,
             new ConfigurationManagerAttributes { Order = 1, CustomDrawer = ScreenPresetDrawer }
         ));
@@ -403,23 +403,33 @@ public class GraphicsConfig
         Current.BloomMultiplier.SettingChanged += OnMapSettingsChanged;
     }
 
-    public void SetMapConfig(string map, bool enabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f)
+    public void SetMapConfig(string map, bool lodEnabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f)
     {
         foreach (var name in _mapNames[map])
         {
             var overrides = _mapConfigs[name];
 
-            overrides.LodEnabled.Value = enabled;
+            overrides.LodEnabled.Value = lodEnabled;
             overrides.LodBias.Value = lodBias;
             overrides.DetailDistance.Value = detailDistance;
             overrides.DetailDensity.Value = detailDensityScaling;
         }
     }
 
+    public void EnableTonemaps()
+    {
+        foreach (var mapConfig in _mapConfigs.Values)
+        {
+            mapConfig.TonemapEnabled.Value = true;
+            mapConfig.TonemapBrightness.Value = (float)mapConfig.TonemapBrightness.DefaultValue;
+            mapConfig.TonemapContrast.Value = (float)mapConfig.TonemapContrast.DefaultValue;
+        }
+    }
+
     private void AddMapConfig(
         ConfigFile config, string map,
         bool lodEnabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f,
-        bool tonemapEnabled = true, Vector3 tonemapPrimary = default, Vector3 tonemapSecondary = default, float bloomMultiplier = 1f,
+        bool tonemapEnabled = false, Vector3 tonemapPrimary = default, Vector3 tonemapSecondary = default, float bloomMultiplier = 1f,
         bool browsable = true
     )
     {
@@ -492,6 +502,7 @@ public class GraphicsConfig
         {
             foreach (var mapConfig in _mapConfigs.Values)
             {
+                mapConfig.TonemapEnabled.Value = true;
                 mapConfig.TonemapBrightness.Value = (float)mapConfig.TonemapBrightness.DefaultValue + 0.5f;
                 mapConfig.TonemapContrast.Value = (float)mapConfig.TonemapContrast.DefaultValue - 5f;
             }
@@ -501,6 +512,7 @@ public class GraphicsConfig
         {
             foreach (var mapConfig in _mapConfigs.Values)
             {
+                mapConfig.TonemapEnabled.Value = true;
                 mapConfig.TonemapBrightness.Value = (float)mapConfig.TonemapBrightness.DefaultValue - 0.4f;
             }
         }
@@ -509,6 +521,7 @@ public class GraphicsConfig
         {
             foreach (var mapConfig in _mapConfigs.Values)
             {
+                mapConfig.TonemapEnabled.Value = true;
                 mapConfig.TonemapBrightness.Value = (float)mapConfig.TonemapBrightness.DefaultValue;
                 mapConfig.TonemapContrast.Value = (float)mapConfig.TonemapContrast.DefaultValue;
             }

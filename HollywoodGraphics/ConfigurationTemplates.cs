@@ -9,6 +9,16 @@ public static class ConfigurationTemplates
         // First reset to the defaults
         SetDefaults(mainConfig);
         
+        Plugin.GraphicsConfig.Bloom.UseLensDust.Value = true;
+        Plugin.GraphicsConfig.Bloom.UseAnamorphicFlare.Value = true;
+        Plugin.GraphicsConfig.Bloom.UseStarFlare.Value = true;
+
+        Plugin.GraphicsConfig.AOEnabled.Value = true;
+        Plugin.GraphicsConfig.AOMultiBounceEnabled.Value = true;
+        Plugin.GraphicsConfig.AOColorBleedEnabled.Value = true;
+
+        Plugin.GraphicsConfig.SunColorEnabled.Value = true;
+        
         Plugin.GraphicsConfig.SetMapConfig("Customs", true, 4f, 2.5f, 2f);
         Plugin.GraphicsConfig.SetMapConfig("FactoryDay", true, 10f, 2.5f, 2f);
         Plugin.GraphicsConfig.SetMapConfig("FactoryNight", true, 10f, 2.5f, 2f);
@@ -18,6 +28,8 @@ public static class ConfigurationTemplates
         Plugin.GraphicsConfig.SetMapConfig("GroundZero", true, 4f, 2.5f, 2f);
         Plugin.GraphicsConfig.SetMapConfig("Shoreline", true, 8f, 2.5f, 2f);
         Plugin.GraphicsConfig.SetMapConfig("Woods", true, 8f, 2.5f, 2f);
+
+        Plugin.GraphicsConfig.EnableTonemaps();
     }
 
     public static void SetPotato(ConfigFile mainConfig)

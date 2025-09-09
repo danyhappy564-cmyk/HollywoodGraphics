@@ -59,6 +59,8 @@ public static class ConfigurationTemplates
         Plugin.GraphicsConfig.AOEnabled.Value = false;
         Plugin.GraphicsConfig.AOMultiBounceEnabled.Value = false;
         Plugin.GraphicsConfig.AOColorBleedEnabled.Value = false;
+        
+        Plugin.GraphicsConfig.LightFlareEnabled.Value = false;
 
         Plugin.GraphicsConfig.SunColorEnabled.Value = false;
         

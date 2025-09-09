@@ -75,7 +75,7 @@ public class Plugin : BaseUnityPlugin
                 ConfigurationTemplates.SetJanky(entry.ConfigFile);
             }
             
-            if (GUILayout.Button("Disable Everything"))
+            if (GUILayout.Button("Disable All"))
             {
                 ConfigurationTemplates.SetDisabled(entry.ConfigFile);
             }

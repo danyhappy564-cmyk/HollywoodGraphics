@@ -61,7 +61,6 @@ public static class ConfigurationTemplates
         Plugin.GraphicsConfig.AOColorBleedEnabled.Value = false;
         
         Plugin.GraphicsConfig.LightFlareEnabled.Value = false;
-
         Plugin.GraphicsConfig.SunColorEnabled.Value = false;
         
         Plugin.GraphicsConfig.ToggleTonemaps(false);

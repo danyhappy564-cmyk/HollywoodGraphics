@@ -10,9 +10,6 @@ public class Atmosphere
     private readonly WeatherController _weatherController;
     private readonly Gradient _defaultLightColors;
 
-    private const float RepeatRate = 5f;
-    private float _timer;
-
     public Atmosphere()
     {
         var weather = GameObject.Find("Weather");

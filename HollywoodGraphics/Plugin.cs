@@ -13,7 +13,7 @@ namespace HollywoodGraphics;
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public class Plugin : BaseUnityPlugin
 {
-    public const string HollywoodGraphicsVersion = "1.0.1";
+    public const string HollywoodGraphicsVersion = "1.0.2";
     public static ManualLogSource Log;
 
     public static GraphicsConfig GraphicsConfig;

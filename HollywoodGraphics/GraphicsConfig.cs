@@ -62,11 +62,11 @@ public sealed class BloomConfig
 
     public BloomConfig(ConfigFile config)
     {
-        const string bloomSection = "03. Bloom";
+        const string bloomSection = "03. Bloom v1";
 
         BloomIntensity = config.Bind(bloomSection, "Master Bloom Intensity", 0.2f, new ConfigDescription(
             "Controls the overall intensity of the bloom effect.",
-            new AcceptableValueRange<float>(0f, 5f),
+            new AcceptableValueRange<float>(0f, 1f),
             new ConfigurationManagerAttributes { Order = 104 }
         ));
         BloomIntensity.SettingChanged += OnConfigChanged;
@@ -104,16 +104,29 @@ public sealed class BloomConfig
             null,
             new ConfigurationManagerAttributes { Order = 96 }
         ));
-        UseLensDust.SettingChanged += OnConfigChanged;
+        UseLensDust.SettingChanged += (sender, args) =>
+        {
+            // Adjust the bloom intensity to compensate for this feature subduing overall bloom
+            if (UseLensDust.Value)
+            {
+                BloomIntensity.Value *= 5f;
+            }
+            else
+            {
+                BloomIntensity.Value /= 5f;
+            }
+            
+            OnConfigChanged(sender, args);
+        }; 
 
-        DustIntensity = config.Bind(bloomSection, "Lens Dust Amount v1", 0.3f, new ConfigDescription(
+        DustIntensity = config.Bind(bloomSection, "Lens Dust Amount", 0.3f, new ConfigDescription(
             "Controls the intensity of the lens dust effect.",
             new AcceptableValueRange<float>(0f, 5f),
             new ConfigurationManagerAttributes { Order = 95 }
         ));
         DustIntensity.SettingChanged += OnConfigChanged;
 
-        LensDust = config.Bind(bloomSection, "Lens Dust Texture v1", "LensDust4A.png", new ConfigDescription(
+        LensDust = config.Bind(bloomSection, "Lens Dust Texture", "LensDust4A.png", new ConfigDescription(
             "Texture to use for the lens dust effect.",
             null,
             new ConfigurationManagerAttributes { Order = 94 }

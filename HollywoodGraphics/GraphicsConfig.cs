@@ -106,14 +106,14 @@ public sealed class BloomConfig
         ));
         UseLensDust.SettingChanged += OnConfigChanged;
 
-        DustIntensity = config.Bind(bloomSection, "Lens Dust Amount", 0.3f, new ConfigDescription(
+        DustIntensity = config.Bind(bloomSection, "Lens Dust Amount v1", 0.3f, new ConfigDescription(
             "Controls the intensity of the lens dust effect.",
             new AcceptableValueRange<float>(0f, 5f),
             new ConfigurationManagerAttributes { Order = 95 }
         ));
         DustIntensity.SettingChanged += OnConfigChanged;
 
-        LensDust = config.Bind(bloomSection, "Lens Dust Texture", "LensDust4.png", new ConfigDescription(
+        LensDust = config.Bind(bloomSection, "Lens Dust Texture v1", "LensDust4A.png", new ConfigDescription(
             "Texture to use for the lens dust effect.",
             null,
             new ConfigurationManagerAttributes { Order = 94 }

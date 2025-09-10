@@ -8,6 +8,8 @@ public static class ConfigurationTemplates
     {
         // First reset to the defaults
         SetDefaults(mainConfig);
+
+        Plugin.GraphicsConfig.Bloom.DustIntensity.Value = 0.5f;
         
         Plugin.GraphicsConfig.SetMapConfig("Customs", true, 4f, 2.5f, 2f);
         Plugin.GraphicsConfig.SetMapConfig("FactoryDay", true, 10f, 2.5f, 2f);

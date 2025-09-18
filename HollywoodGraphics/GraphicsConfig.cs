@@ -17,6 +17,9 @@ public class MapConfig(
     ConfigEntry<float> tonemapContrast,
     ConfigEntry<Vector3> tonemapPrimary,
     ConfigEntry<Vector3> tonemapSecondary,
+    ConfigEntry<bool> fogEnabled,
+    ConfigEntry<float> fogHeightFalloff,
+    ConfigEntry<float> fogZeroLevel,
     ConfigEntry<float> bloomMultiplier
 )
 {
@@ -32,6 +35,10 @@ public class MapConfig(
     public readonly ConfigEntry<float> TonemapContrast = tonemapContrast;
     public readonly ConfigEntry<Vector3> TonemapPrimary = tonemapPrimary;
     public readonly ConfigEntry<Vector3> TonemapSecondary = tonemapSecondary;
+
+    public readonly ConfigEntry<bool> FogEnabled = fogEnabled;
+    public readonly ConfigEntry<float> FogHeightFalloff = fogHeightFalloff;
+    public readonly ConfigEntry<float> FogZeroLevel = fogZeroLevel;
 
     public readonly ConfigEntry<float> BloomMultiplier = bloomMultiplier;
 }
@@ -115,9 +122,9 @@ public sealed class BloomConfig
             {
                 BloomIntensity.Value /= 5f;
             }
-            
+
             OnConfigChanged(sender, args);
-        }; 
+        };
 
         DustIntensity = config.Bind(bloomSection, "Lens Dust Amount", 0.3f, new ConfigDescription(
             "Controls the intensity of the lens dust effect.",
@@ -317,7 +324,7 @@ public class GraphicsConfig
         SunColorEnabled = config.Bind(lights, "Ambient Light Override", true, new ConfigDescription(
             "Toggles whether the ambient light colors are overridden.",
             null,
-            new ConfigurationManagerAttributes { Order = 9}
+            new ConfigurationManagerAttributes { Order = 9 }
         ));
         SunColorEnabled.SettingChanged += OnAtmosphereSettingsChanged;
         SunColor1 = config.Bind(lights, "Ambient Light Color 1", new Vector4(0.35f, 0.4f, 0.5f, 0.32f), new ConfigDescription(
@@ -350,7 +357,7 @@ public class GraphicsConfig
             new ConfigurationManagerAttributes { Order = 4 }
         ));
         SunColor5.SettingChanged += OnAtmosphereSettingsChanged;
-        
+
         LightFlareEnabled = config.Bind(lights, "Env. Light Flares Changes (RESTART)", true, new ConfigDescription(
             "Makes the environmental light flares more prominent and appropriate.",
             null,
@@ -368,29 +375,29 @@ public class GraphicsConfig
         ));
 
         Bloom = new BloomConfig(config);
-        
+
         config.Bind("04. General", "Tonemap Preset", "", new ConfigDescription(
             "Apply a tonemap preset.",
             null,
             new ConfigurationManagerAttributes { Order = 1, CustomDrawer = ScreenPresetDrawer }
         ));
-        
+
         AddMapConfig(config, "Default", browsable: false, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "FactoryDay", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f), bloomMultiplier: 2f);
         AddMapConfig(config, "FactoryNight", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f));
-        AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogHeightFalloff: 0.5f, fogZerLevel: 5f);
         AddMapConfig(config, "Laboratory", tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Lighthouse", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Lighthouse", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogZerLevel: 5f);
         AddMapConfig(config, "Reserve", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
         AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Shoreline", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Shoreline", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogZerLevel: 5f);
         AddMapConfig(config, "Streets", tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Woods", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Woods", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogZerLevel: 5f);
 
         Current = _mapConfigs["default"];
     }
-    
+
     public void SetCurrentMap(string map)
     {
         Current.LodBias.SettingChanged -= OnMapSettingsChanged;
@@ -400,6 +407,9 @@ public class GraphicsConfig
         Current.TonemapPrimary.SettingChanged -= OnMapSettingsChanged;
         Current.TonemapSecondary.SettingChanged -= OnMapSettingsChanged;
         Current.BloomMultiplier.SettingChanged -= OnMapSettingsChanged;
+        Current.FogEnabled.SettingChanged -= OnMapSettingsChanged;
+        Current.FogHeightFalloff.SettingChanged -= OnMapSettingsChanged;
+        Current.FogZeroLevel.SettingChanged -= OnMapSettingsChanged;
 
         if (!_mapConfigs.TryGetValue(map, out Current))
         {
@@ -414,6 +424,9 @@ public class GraphicsConfig
         Current.TonemapPrimary.SettingChanged += OnMapSettingsChanged;
         Current.TonemapSecondary.SettingChanged += OnMapSettingsChanged;
         Current.BloomMultiplier.SettingChanged += OnMapSettingsChanged;
+        Current.FogEnabled.SettingChanged += OnMapSettingsChanged;
+        Current.FogHeightFalloff.SettingChanged += OnMapSettingsChanged;
+        Current.FogZeroLevel.SettingChanged += OnMapSettingsChanged;
     }
 
     public void SetMapConfig(string map, bool lodEnabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f)
@@ -443,6 +456,7 @@ public class GraphicsConfig
         ConfigFile config, string map,
         bool lodEnabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f,
         bool tonemapEnabled = true, Vector3 tonemapPrimary = default, Vector3 tonemapSecondary = default, float bloomMultiplier = 1f,
+        bool fogEnabled = true, float fogHeightFalloff = 0.125f, float fogZerLevel = 0f,
         bool browsable = true
     )
     {
@@ -481,12 +495,12 @@ public class GraphicsConfig
             config.Bind(mapSection, $"{map} Brightness", 0f, new ConfigDescription(
                 "The default camera position offset relative to the first person view (in meters).",
                 new AcceptableValueRange<float>(-5f, 5f),
-                tags: new ConfigurationManagerAttributes { Order = 4, Browsable = browsable}
+                tags: new ConfigurationManagerAttributes { Order = 4, Browsable = browsable }
             )),
             config.Bind(mapSection, $"{map} Contrast", 0f, new ConfigDescription(
                 "The default camera position offset relative to the first person view (in meters).",
                 new AcceptableValueRange<float>(-15f, 15f),
-                tags: new ConfigurationManagerAttributes { Order = 3, Browsable = browsable}
+                tags: new ConfigurationManagerAttributes { Order = 3, Browsable = browsable }
             )),
             config.Bind(mapSection, $"{map} Primary Tonemap", tonemapPrimary, new ConfigDescription(
                 "The default camera position offset relative to the first person view (in meters).",
@@ -496,10 +510,25 @@ public class GraphicsConfig
                 "The default camera position offset relative to the first person view (in meters).",
                 tags: new ConfigurationManagerAttributes { Order = 1, Browsable = browsable, IsAdvanced = true }
             )),
+            config.Bind(mapSection, $"{map} Enable Fog Tuning", fogEnabled, new ConfigDescription(
+                "Toggles overriding the fog behavior.",
+                null,
+                new ConfigurationManagerAttributes { Order = 0, Browsable = browsable }
+            )),
+            config.Bind(mapSection, $"{map} Fog Height Falloff", fogHeightFalloff, new ConfigDescription(
+                "Falloff adjustment for fog at max fogginess.",
+                new AcceptableValueRange<float>(0f, 1f),
+                new ConfigurationManagerAttributes { Order = -1, Browsable = browsable, IsAdvanced = true }
+            )),
+            config.Bind(mapSection, $"{map} Fog Zero Level", fogZerLevel, new ConfigDescription(
+                "Zero-level adjustment for fog at max fogginess.",
+                new AcceptableValueRange<float>(0f, 20f),
+                new ConfigurationManagerAttributes { Order = -2, Browsable = browsable, IsAdvanced = true }
+            )),
             config.Bind(mapSection, $"{map} Bloom Mult", bloomMultiplier, new ConfigDescription(
                 "Multiplies the baseline bloom intensity.",
                 new AcceptableValueRange<float>(0.1f, 5f),
-                new ConfigurationManagerAttributes { Order = 0, Browsable = browsable, IsAdvanced = true }
+                new ConfigurationManagerAttributes { Order = -3, Browsable = browsable, IsAdvanced = true }
             ))
         );
 
@@ -520,7 +549,7 @@ public class GraphicsConfig
                 mapConfig.TonemapContrast.Value = (float)mapConfig.TonemapContrast.DefaultValue - 5f;
             }
         }
-        
+
         if (GUILayout.Button("Dark"))
         {
             foreach (var mapConfig in _mapConfigs.Values)
@@ -529,7 +558,7 @@ public class GraphicsConfig
                 mapConfig.TonemapBrightness.Value = (float)mapConfig.TonemapBrightness.DefaultValue - 0.4f;
             }
         }
-        
+
         if (GUILayout.Button("Default"))
         {
             foreach (var mapConfig in _mapConfigs.Values)
@@ -540,7 +569,7 @@ public class GraphicsConfig
             }
         }
     }
-    
+
     private static void OnMapSettingsChanged(object o, EventArgs e)
     {
         Singleton<GraphicsController>.Instance?.UpdateMapSettings();
@@ -550,7 +579,7 @@ public class GraphicsConfig
     {
         Singleton<GraphicsController>.Instance?.UpdateAmbientOcclusionSettings();
     }
-    
+
     private static void OnAtmosphereSettingsChanged(object o, EventArgs e)
     {
         Singleton<GraphicsController>.Instance?.UpdateAtmosphereSettings();

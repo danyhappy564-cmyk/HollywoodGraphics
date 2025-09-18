@@ -20,6 +20,7 @@ public class GraphicsControllerInitPatch : ModulePatch
     public static void Postfix(GameWorld __instance)
     {
         var graphicsController = __instance.gameObject.AddComponent<GraphicsController>();
+        graphicsController.player = __instance.MainPlayer;
         Singleton<GraphicsController>.Create(graphicsController);
     }
 }

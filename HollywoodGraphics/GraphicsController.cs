@@ -1,4 +1,5 @@
 ﻿using Comfort.Common;
+using EFT;
 using HollywoodGraphics.Components;
 using UnityEngine;
 
@@ -6,6 +7,8 @@ namespace HollywoodGraphics;
 
 public class GraphicsController : MonoBehaviour
 {
+    public Player player;
+    
     private Atmosphere _atmosphere;
     private Bloom _bloom;
     private Tonemap _tonemap;
@@ -13,7 +16,7 @@ public class GraphicsController : MonoBehaviour
     
     public void Start()
     {
-        _atmosphere = new Atmosphere();
+        _atmosphere = new Atmosphere(player);
         Plugin.Log.LogInfo("Atmospherics initialized");
         
         _bloom = new Bloom();
@@ -26,7 +29,7 @@ public class GraphicsController : MonoBehaviour
         Plugin.Log.LogInfo("Ambient Occlusion initialized");
         
         UpdateMapSettings();
-        Plugin.Log.LogInfo($"Updated all settings");
+        Plugin.Log.LogInfo("Updated all settings");
     }
     
     public void UpdateMapSettings()
@@ -52,6 +55,8 @@ public class GraphicsController : MonoBehaviour
         
         // Apply per map bloom stuff
         _bloom.UpdateSettings();
+        // Apply per map atmospherics
+        _atmosphere.UpdateSettings();
     }
 
     public void UpdateAtmosphereSettings()
@@ -76,6 +81,7 @@ public class GraphicsController : MonoBehaviour
 
     private void Update()
     {
+        _atmosphere.Update();
         _bloom.Update();
     }
 

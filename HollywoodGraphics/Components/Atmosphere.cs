@@ -1,5 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using BepInEx.Configuration;
+using Comfort.Common;
+using EFT;
 using EFT.Weather;
 using UnityEngine;
 
@@ -7,18 +9,38 @@ namespace HollywoodGraphics.Components;
 
 public class Atmosphere
 {
+    private float _envCurrent;
+    private float _envCurrentVelocity;
+    
+    private readonly Player _player;
+
     private readonly WeatherController _weatherController;
+    private readonly LevelSettings _levelSettings;
     private readonly Gradient _defaultLightColors;
 
-    public Atmosphere()
+    private readonly float _defaultFalloff;
+    private readonly float _defaultZeroLevel;
+
+    private readonly bool _enabled;
+
+    public Atmosphere(Player player)
     {
         var weather = GameObject.Find("Weather");
-        
+
         if (weather == null)
             return;
-            
+
         _weatherController = weather.GetComponent<WeatherController>();
+        _levelSettings = Singleton<LevelSettings>.Instance;
+
+        if (_weatherController == null || _levelSettings == null)
+            return;
+
+        _player = player;
         
+        _defaultFalloff = _levelSettings.HeightFalloff;
+        _defaultZeroLevel = _levelSettings.ZeroLevel;
+
         _defaultLightColors = _weatherController.TimeOfDayController.LightColor;
 
         // Increase sun brightness a lot since the default value is not nearly enough to trigger a decent flare
@@ -35,19 +57,33 @@ public class Atmosphere
             ],
             colorKeys =
             [
-                new GradientColorKey(new Color( 0.45f,  0.50f,  0.6f, 1f), 0.0f),
-                new GradientColorKey(new Color( 0.45f,  0.50f,  0.6f, 1f), 1f)
+                new GradientColorKey(new Color(0.45f, 0.50f, 0.6f, 1f), 0.0f),
+                new GradientColorKey(new Color(0.45f, 0.50f, 0.6f, 1f), 1f)
             ]
         };
-        
+
         // _weatherController.TOD_Sky_0.Day.LightIntensity = 0.75f;
         // _weatherController.TimeOfDayController.ScatteringBrightnessMultiplier = 0.75f;
 
         UpdateSettings();
+
+        _enabled = true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Update()
+    {
+        if (!_enabled)
+            return;
+
+        UpdateFog();
     }
 
     public void UpdateSettings()
     {
+        if (!_enabled)
+            return;
+
         /* Original color curve:
          * [Info   :Janky's HollywoodFX] Light color time: 0 key: RGBA(0.809, 0.881, 1.000, 1.000)
            [Info   :Janky's HollywoodFX] Light color time: 0.5115129 key: RGBA(0.000, 0.000, 0.000, 1.000)
@@ -74,16 +110,33 @@ public class Atmosphere
                     FromConfig(Plugin.GraphicsConfig.SunColor4),
                     FromConfig(Plugin.GraphicsConfig.SunColor5)
                 ]
-            };            
+            };
         }
         else
         {
             _weatherController.TimeOfDayController.LightColor = _defaultLightColors;
         }
+
+        UpdateFog();
     }
 
     private static GradientColorKey FromConfig(ConfigEntry<Vector4> config)
     {
         return new GradientColorKey(new Color(config.Value.x, config.Value.y, config.Value.z), config.Value.w);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void UpdateFog()
+    {
+        var fogFactor = Plugin.GraphicsConfig.Current.FogEnabled.Value ? Mathf.InverseLerp(0.005f, 0.02f, _weatherController.WeatherCurve.Fog) : 0f;
+
+        var envTarget = _player.Environment == EnvironmentType.Indoor ? -7.5f : 0f;
+        _envCurrent = Mathf.SmoothDamp(_envCurrent, envTarget, ref _envCurrentVelocity, 1.5f);
+        
+        var falloffBump = Plugin.GraphicsConfig.Current.FogHeightFalloff.Value * fogFactor;
+        var zeroLevelBump = (Plugin.GraphicsConfig.Current.FogZeroLevel.Value + _envCurrent) * fogFactor;
+
+        _levelSettings.HeightFalloff = _defaultFalloff + falloffBump;
+        _levelSettings.ZeroLevel = _defaultZeroLevel + zeroLevelBump;
     }
 }

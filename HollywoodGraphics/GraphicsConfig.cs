@@ -239,6 +239,9 @@ public class GraphicsConfig
     public readonly ConfigEntry<bool> LightFlareEnabled;
     public readonly ConfigEntry<float> LightFlareIntensity;
     public readonly ConfigEntry<float> LightFlareSize;
+    
+    public readonly ConfigEntry<bool> FogIndoorReductionEnabled;
+    public readonly ConfigEntry<float> FogIndoorReductionAmount;
 
     public readonly BloomConfig Bloom;
 
@@ -376,6 +379,16 @@ public class GraphicsConfig
 
         Bloom = new BloomConfig(config);
 
+        FogIndoorReductionEnabled = config.Bind("04. General", "Reduce Indoor Fog", true, new ConfigDescription(
+            "Does what it says on the tin.",
+            null,
+            new ConfigurationManagerAttributes { Order = 3 }
+        ));
+        FogIndoorReductionAmount = config.Bind("04. General", "Indoor Fog Reduction", -7.5f, new ConfigDescription(
+            "Decreases the fog level by the specified quantity.",
+            new AcceptableValueRange<float>(-50f, 10f),
+            new ConfigurationManagerAttributes { Order = 2 }
+        ));
         config.Bind("04. General", "Tonemap Preset", "", new ConfigDescription(
             "Apply a tonemap preset.",
             null,
@@ -383,7 +396,7 @@ public class GraphicsConfig
         ));
 
         AddMapConfig(config, "Default", browsable: false, tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
+        AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogHeightFalloff: 0.4f);
         AddMapConfig(config, "FactoryDay", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f), bloomMultiplier: 2f);
         AddMapConfig(config, "FactoryNight", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f));
         AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogHeightFalloff: 0.5f, fogZerLevel: 5f);

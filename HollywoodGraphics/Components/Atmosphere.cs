@@ -130,8 +130,15 @@ public class Atmosphere
     {
         var fogFactor = Plugin.GraphicsConfig.Current.FogEnabled.Value ? Mathf.InverseLerp(0.005f, 0.02f, _weatherController.WeatherCurve.Fog) : 0f;
 
-        var envTarget = _player.Environment == EnvironmentType.Indoor ? -7.5f : 0f;
-        _envCurrent = Mathf.SmoothDamp(_envCurrent, envTarget, ref _envCurrentVelocity, 1.5f);
+        if (Plugin.GraphicsConfig.FogIndoorReductionEnabled.Value)
+        {
+            var envTarget = _player.Environment == EnvironmentType.Indoor ? Plugin.GraphicsConfig.FogIndoorReductionAmount.Value : 0f;
+            _envCurrent = Mathf.SmoothDamp(_envCurrent, envTarget, ref _envCurrentVelocity, 1.5f);
+        }
+        else
+        {
+            _envCurrent = 0f;
+        }
         
         var falloffBump = Plugin.GraphicsConfig.Current.FogHeightFalloff.Value * fogFactor;
         var zeroLevelBump = (Plugin.GraphicsConfig.Current.FogZeroLevel.Value + _envCurrent) * fogFactor;

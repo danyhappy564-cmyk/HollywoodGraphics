@@ -239,7 +239,7 @@ public class GraphicsConfig
     public readonly ConfigEntry<bool> LightFlareEnabled;
     public readonly ConfigEntry<float> LightFlareIntensity;
     public readonly ConfigEntry<float> LightFlareSize;
-    
+
     public readonly ConfigEntry<bool> FogIndoorReductionEnabled;
     public readonly ConfigEntry<float> FogIndoorReductionAmount;
 
@@ -384,7 +384,7 @@ public class GraphicsConfig
             null,
             new ConfigurationManagerAttributes { Order = 3 }
         ));
-        FogIndoorReductionAmount = config.Bind("04. General", "Indoor Fog Reduction", -7.5f, new ConfigDescription(
+        FogIndoorReductionAmount = config.Bind("04. General", "Indoor Fog Reduction", -5f, new ConfigDescription(
             "Decreases the fog level by the specified quantity.",
             new AcceptableValueRange<float>(-50f, 10f),
             new ConfigurationManagerAttributes { Order = 2 }
@@ -395,18 +395,20 @@ public class GraphicsConfig
             new ConfigurationManagerAttributes { Order = 1, CustomDrawer = ScreenPresetDrawer }
         ));
 
-        AddMapConfig(config, "Default", browsable: false, tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogHeightFalloff: 0.4f);
+        var tonemapDefault = new Vector3(20f, 0f, 20f);
+        
+        AddMapConfig(config, "Default", browsable: false, tonemapPrimary: tonemapDefault);
+        AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogHeightFalloff: 0.25f);
         AddMapConfig(config, "FactoryDay", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f), bloomMultiplier: 2f);
         AddMapConfig(config, "FactoryNight", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f));
-        AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogHeightFalloff: 0.5f, fogZerLevel: 5f);
-        AddMapConfig(config, "Laboratory", tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Lighthouse", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogZerLevel: 5f);
-        AddMapConfig(config, "Reserve", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Shoreline", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogZerLevel: 5f);
-        AddMapConfig(config, "Streets", tonemapPrimary: new Vector3(20f, 0f, 20f));
-        AddMapConfig(config, "Woods", false, 4f, 2.5f, 2f, tonemapPrimary: new Vector3(20f, 0f, 20f), fogZerLevel: 5f);
+        AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogZeroLevel: 5f, fogHeightFalloff: 0.4f);
+        AddMapConfig(config, "Laboratory", tonemapPrimary: tonemapDefault);
+        AddMapConfig(config, "Lighthouse", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogZeroLevel: 5f);
+        AddMapConfig(config, "Reserve", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault);
+        AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogHeightFalloff: 0.1f, fogZeroLevel: -100f);
+        AddMapConfig(config, "Shoreline", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogHeightFalloff: 0.1f, fogZeroLevel: 20f);
+        AddMapConfig(config, "Streets", tonemapPrimary: tonemapDefault, fogHeightFalloff: 0.1f, fogZeroLevel: -100f);
+        AddMapConfig(config, "Woods", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogZeroLevel: 20f);
 
         Current = _mapConfigs["default"];
     }
@@ -469,7 +471,7 @@ public class GraphicsConfig
         ConfigFile config, string map,
         bool lodEnabled = false, float lodBias = 4, float detailDistance = 1f, float detailDensityScaling = 1f,
         bool tonemapEnabled = true, Vector3 tonemapPrimary = default, Vector3 tonemapSecondary = default, float bloomMultiplier = 1f,
-        bool fogEnabled = true, float fogHeightFalloff = 0.125f, float fogZerLevel = 0f,
+        bool fogEnabled = true, float fogHeightFalloff = 0.125f, float fogZeroLevel = 0f,
         bool browsable = true
     )
     {
@@ -533,9 +535,9 @@ public class GraphicsConfig
                 new AcceptableValueRange<float>(0f, 1f),
                 new ConfigurationManagerAttributes { Order = -1, Browsable = browsable, IsAdvanced = true }
             )),
-            config.Bind(mapSection, $"{map} Fog Zero Level", fogZerLevel, new ConfigDescription(
+            config.Bind(mapSection, $"{map} Fog Zero Level", fogZeroLevel, new ConfigDescription(
                 "Zero-level adjustment for fog at max fogginess.",
-                new AcceptableValueRange<float>(0f, 20f),
+                new AcceptableValueRange<float>(-100f, 20f),
                 new ConfigurationManagerAttributes { Order = -2, Browsable = browsable, IsAdvanced = true }
             )),
             config.Bind(mapSection, $"{map} Bloom Mult", bloomMultiplier, new ConfigDescription(

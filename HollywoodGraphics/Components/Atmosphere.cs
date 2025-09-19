@@ -11,7 +11,7 @@ public class Atmosphere
 {
     private float _envCurrent;
     private float _envCurrentVelocity;
-    
+
     private readonly Player _player;
 
     private readonly WeatherController _weatherController;
@@ -37,7 +37,7 @@ public class Atmosphere
             return;
 
         _player = player;
-        
+
         _defaultFalloff = _levelSettings.HeightFalloff;
         _defaultZeroLevel = _levelSettings.ZeroLevel;
 
@@ -128,7 +128,9 @@ public class Atmosphere
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateFog()
     {
-        var fogFactor = Plugin.GraphicsConfig.Current.FogEnabled.Value ? Mathf.InverseLerp(0.005f, 0.02f, _weatherController.WeatherCurve.Fog) : 0f;
+        var fogFactor = Plugin.GraphicsConfig.Current.FogEnabled.Value
+            ? Mathf.Sqrt(Mathf.InverseLerp(0.005f, 0.025f, _weatherController.WeatherCurve.Fog))
+            : 0f;
 
         if (Plugin.GraphicsConfig.FogIndoorReductionEnabled.Value)
         {
@@ -139,7 +141,7 @@ public class Atmosphere
         {
             _envCurrent = 0f;
         }
-        
+
         var falloffBump = Plugin.GraphicsConfig.Current.FogHeightFalloff.Value * fogFactor;
         var zeroLevelBump = (Plugin.GraphicsConfig.Current.FogZeroLevel.Value + _envCurrent) * fogFactor;
 

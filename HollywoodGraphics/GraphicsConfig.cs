@@ -398,10 +398,10 @@ public class GraphicsConfig
         var tonemapDefault = new Vector3(20f, 0f, 20f);
         
         AddMapConfig(config, "Default", browsable: false, tonemapPrimary: tonemapDefault);
-        AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogHeightFalloff: 0.25f);
+        AddMapConfig(config, "Customs", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogHeightFalloff: 0.2f);
         AddMapConfig(config, "FactoryDay", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f), bloomMultiplier: 2f);
         AddMapConfig(config, "FactoryNight", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f));
-        AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogZeroLevel: 5f, fogHeightFalloff: 0.4f);
+        AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogZeroLevel: 5f);
         AddMapConfig(config, "Laboratory", tonemapPrimary: tonemapDefault);
         AddMapConfig(config, "Lighthouse", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogZeroLevel: 5f);
         AddMapConfig(config, "Reserve", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault);
@@ -530,12 +530,12 @@ public class GraphicsConfig
                 null,
                 new ConfigurationManagerAttributes { Order = 0, Browsable = browsable }
             )),
-            config.Bind(mapSection, $"{map} Fog Height Falloff", fogHeightFalloff, new ConfigDescription(
+            config.Bind(mapSection, $"{map} Fog Height Falloff v1", fogHeightFalloff, new ConfigDescription(
                 "Falloff adjustment for fog at max fogginess.",
                 new AcceptableValueRange<float>(0f, 1f),
                 new ConfigurationManagerAttributes { Order = -1, Browsable = browsable, IsAdvanced = true }
             )),
-            config.Bind(mapSection, $"{map} Fog Zero Level", fogZeroLevel, new ConfigDescription(
+            config.Bind(mapSection, $"{map} Fog Zero Level v1", fogZeroLevel, new ConfigDescription(
                 "Zero-level adjustment for fog at max fogginess.",
                 new AcceptableValueRange<float>(-100f, 20f),
                 new ConfigurationManagerAttributes { Order = -2, Browsable = browsable, IsAdvanced = true }

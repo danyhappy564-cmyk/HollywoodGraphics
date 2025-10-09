@@ -43,12 +43,14 @@ public class Atmosphere
 
         _defaultLightColors = _weatherController.TimeOfDayController.LightColor;
 
+        var sky = MonoBehaviourSingleton<TOD_Sky>.Instance;
+
         // Increase sun brightness a lot since the default value is not nearly enough to trigger a decent flare
-        _weatherController.TOD_Sky_0.Sun.MeshBrightness = 10f;
-        _weatherController.TOD_Sky_0.Moon.MeshSize = 0.5f;
-        _weatherController.TOD_Sky_0.Moon.HaloSize = 0.5f;
-        _weatherController.TOD_Sky_0.Moon.MeshBrightness = 2.5f;
-        _weatherController.TOD_Sky_0.Moon.HaloColor = new Gradient()
+        sky.Sun.MeshBrightness = 10f;
+        sky.Moon.MeshSize = 0.5f;
+        sky.Moon.HaloSize = 0.5f;
+        sky.Moon.MeshBrightness = 2.5f;
+        sky.Moon.HaloColor = new Gradient()
         {
             alphaKeys =
             [

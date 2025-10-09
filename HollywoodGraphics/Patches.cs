@@ -5,6 +5,7 @@ using EFT.Interactive;
 using EFT.Weather;
 using GPUInstancer;
 using HarmonyLib;
+using MultiFlare;
 using SPT.Reflection.Patching;
 using UnityEngine;
 
@@ -84,7 +85,7 @@ public class LampControllerAwakePostfixPatch : ModulePatch
 
     [PatchPrefix]
     // ReSharper disable InconsistentNaming
-    public static void Prefix(LampController __instance, MultiFlareLight[] ___MultiFlareLights, MaterialEmission[] ____materialsWithEmission)
+    public static void Prefix(LampController __instance, FlareLight[] ___MultiFlareLights, MaterialEmission[] ____materialsWithEmission)
     {
         if (!Plugin.GraphicsConfig.LightFlareEnabled.Value)
             return;
@@ -94,13 +95,11 @@ public class LampControllerAwakePostfixPatch : ModulePatch
         foreach (var flareLight in ___MultiFlareLights)
         {
             // Plugin.Log.LogInfo($"Flare light: {__instance.name} alpha {flareLight.Alpha} scale {flareLight.Scale} flares {flareLight.Flares.Count}");
+            
+            var alphaField = Traverse.Create(flareLight).Field("_totalAlpha");
+            alphaField.SetValue(alphaField.GetValue<float>() * Plugin.GraphicsConfig.LightFlareIntensity.Value);
 
-            // Apply a floor on the alpha and compress the range with an sqrt
-            flareLight.Alpha *= Plugin.GraphicsConfig.LightFlareIntensity.Value;
-
-            var scaleField = Traverse.Create(flareLight).Field("_scale");
-
-            // ReSharper disable once HeapView.BoxingAllocation
+            var scaleField = Traverse.Create(flareLight).Field("_totalScale");
             scaleField.SetValue(scaleField.GetValue<float>() * Plugin.GraphicsConfig.LightFlareSize.Value);
         }
     }

@@ -25,7 +25,7 @@ public class RayleighScatterringBumpPatch : ModulePatch
         var sky = TOD_Sky.Instance;
         var weatherController = WeatherController.Instance;
         
-        if (weatherController == null || sky == null || !Plugin.GraphicsConfig.FogFixScattering.Value)
+        if (weatherController == null || sky == null)
             return;
         
         var sunHeightFactor = Mathf.Sqrt(Mathf.InverseLerp(0.2f, 0f, sky.SunDirection.y));

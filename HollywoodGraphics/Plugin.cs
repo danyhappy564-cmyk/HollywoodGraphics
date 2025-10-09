@@ -50,7 +50,10 @@ public class Plugin : BaseUnityPlugin
             new TerrainDetailOverridePatch().Enable();
         }
 
-        new RayleighScatterringBumpPatch().Enable();
+        if (GraphicsConfig.FogFixScattering.Value)
+        {
+            new RayleighScatterringBumpPatch().Enable();
+        }
 
         Log.LogInfo("Initialization finished");
 

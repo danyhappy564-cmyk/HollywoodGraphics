@@ -2,11 +2,41 @@
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
+using EFT.Weather;
 using GPUInstancer;
 using HarmonyLib;
 using SPT.Reflection.Patching;
+using UnityEngine;
 
 namespace HollywoodGraphics;
+
+
+public class RayleighScatterringBumpPatch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(ToDController).GetMethod(nameof(ToDController.Update));
+    }
+
+    [PatchPostfix]
+    // ReSharper disable once InconsistentNaming
+    public static void Postfix(ToDController __instance)
+    {
+        var sky = TOD_Sky.Instance;
+        var weatherController = WeatherController.Instance;
+        
+        if (weatherController == null || sky == null || !Plugin.GraphicsConfig.FogFixScattering.Value)
+            return;
+        
+        var sunHeightFactor = Mathf.Sqrt(Mathf.InverseLerp(0.2f, 0f, sky.SunDirection.y));
+        var cloudinessFactor = Mathf.InverseLerp(-1f, 0f, weatherController.WeatherCurve.Cloudiness);
+        var fogFactor = Mathf.Sqrt(Mathf.InverseLerp(0.008f, 0.015f, weatherController.WeatherCurve.Fog));
+        
+        sky.Atmosphere.RayleighMultiplier += 1.5f * sunHeightFactor * cloudinessFactor * fogFactor;
+        sky.Day.ColorMultiplier = 1f - 0.8f * sunHeightFactor * cloudinessFactor * fogFactor;
+    }
+}
+
 
 public class GraphicsControllerInitPatch : ModulePatch
 {

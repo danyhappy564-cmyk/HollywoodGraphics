@@ -18,6 +18,7 @@ public class Plugin : BaseUnityPlugin
 
     public static GraphicsConfig GraphicsConfig;
     private static ConfigEntry<bool> _loggingEnabled;
+    public static ConfigEntry<bool> TestEnabled;
     private static bool _amandsDetected;
     
     public static ConfigEntry<float> lensDustIntensity => GraphicsConfig.Bloom.DustIntensity;
@@ -48,6 +49,8 @@ public class Plugin : BaseUnityPlugin
             new GraphicsControllerInitPatch().Enable();
             new TerrainDetailOverridePatch().Enable();
         }
+
+        new RayleighScatterringBumpPatch().Enable();
 
         Log.LogInfo("Initialization finished");
 

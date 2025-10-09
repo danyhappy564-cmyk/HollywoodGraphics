@@ -240,6 +240,7 @@ public class GraphicsConfig
     public readonly ConfigEntry<float> LightFlareIntensity;
     public readonly ConfigEntry<float> LightFlareSize;
 
+    public readonly ConfigEntry<bool> FogFixScattering;
     public readonly ConfigEntry<bool> FogIndoorReductionEnabled;
     public readonly ConfigEntry<float> FogIndoorReductionAmount;
 
@@ -379,6 +380,11 @@ public class GraphicsConfig
 
         Bloom = new BloomConfig(config);
 
+        FogFixScattering = config.Bind("04. General", "Fix Cursed Fog (RESTART)", true, new ConfigDescription(
+            "Fix the cursed glowing fog during overcast sunrises/sunsets.",
+            null,
+            new ConfigurationManagerAttributes { Order = 4 }
+        ));
         FogIndoorReductionEnabled = config.Bind("04. General", "Reduce Indoor Fog", true, new ConfigDescription(
             "Does what it says on the tin.",
             null,

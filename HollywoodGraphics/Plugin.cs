@@ -8,12 +8,12 @@ using UnityEngine;
 
 namespace HollywoodGraphics;
 
-[BepInPlugin("com.janky.hollywoodgraphics", "Janky's HollywoodGraphics", HollywoodGraphicsVersion)]
+[BepInPlugin("com.janky.hollywoodgraphics", "Janky-HollywoodGraphics", HollywoodGraphicsVersion)]
 [SuppressMessage("ReSharper", "HeapView.ObjectAllocation.Evident")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public class Plugin : BaseUnityPlugin
 {
-    public const string HollywoodGraphicsVersion = "1.0.3";
+    public const string HollywoodGraphicsVersion = "1.1.0";
     public static ManualLogSource Log;
 
     public static GraphicsConfig GraphicsConfig;

@@ -15,11 +15,11 @@ public static class ConfigurationTemplates
         Plugin.GraphicsConfig.SetMapConfig("FactoryDay", true, 10f, 2.5f, 2f);
         Plugin.GraphicsConfig.SetMapConfig("FactoryNight", true, 10f, 2.5f, 2f);
         Plugin.GraphicsConfig.SetMapConfig("Interchange", true, 4f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("Lighthouse", true, 8f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("Reserve", true, 8f, 2.5f, 2f);
+        Plugin.GraphicsConfig.SetMapConfig("Lighthouse", true, 4f, 2.5f, 2f);
+        Plugin.GraphicsConfig.SetMapConfig("Reserve", true, 4f, 2.5f, 2f);
         Plugin.GraphicsConfig.SetMapConfig("GroundZero", true, 4f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("Shoreline", true, 8f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("Woods", true, 8f, 2.5f, 2f);
+        Plugin.GraphicsConfig.SetMapConfig("Shoreline", true, 4f, 2.5f, 2f);
+        Plugin.GraphicsConfig.SetMapConfig("Woods", true, 4f, 2.5f, 2f);
 
         Plugin.GraphicsConfig.ToggleTonemaps(true);
     }

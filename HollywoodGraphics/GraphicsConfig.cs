@@ -255,6 +255,7 @@ public class GraphicsConfig
         { "FactoryNight", ["factory4_night"] },
         { "Interchange", ["interchange"] },
         { "Laboratory", ["laboratory"] },
+        { "Labyrinth", ["labyrinth"] },
         { "Lighthouse", ["lighthouse"] },
         { "Reserve", ["rezervbase"] },
         { "GroundZero", ["sandbox", "sandbox_high"] },
@@ -409,6 +410,7 @@ public class GraphicsConfig
         AddMapConfig(config, "FactoryNight", false, 10f, tonemapPrimary: new Vector3(25f, 0f, 20f));
         AddMapConfig(config, "Interchange", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogZeroLevel: 5f);
         AddMapConfig(config, "Laboratory", tonemapPrimary: tonemapDefault);
+        AddMapConfig(config, "Labyrinth", tonemapPrimary: tonemapDefault);
         AddMapConfig(config, "Lighthouse", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogZeroLevel: 5f);
         AddMapConfig(config, "Reserve", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault);
         AddMapConfig(config, "GroundZero", false, 4f, 2.5f, 2f, tonemapPrimary: tonemapDefault, fogHeightFalloff: 0.1f, fogZeroLevel: -100f);

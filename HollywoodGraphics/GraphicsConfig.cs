@@ -516,21 +516,21 @@ public class GraphicsConfig
                 new ConfigurationManagerAttributes { Order = 5, Browsable = browsable }
             )),
             config.Bind(mapSection, $"{map} Brightness", 0f, new ConfigDescription(
-                "The default camera position offset relative to the first person view (in meters).",
+                "Overall brightness.",
                 new AcceptableValueRange<float>(-5f, 5f),
                 tags: new ConfigurationManagerAttributes { Order = 4, Browsable = browsable }
             )),
             config.Bind(mapSection, $"{map} Contrast", 0f, new ConfigDescription(
-                "The default camera position offset relative to the first person view (in meters).",
+                "Overall contrast.",
                 new AcceptableValueRange<float>(-15f, 15f),
                 tags: new ConfigurationManagerAttributes { Order = 3, Browsable = browsable }
             )),
             config.Bind(mapSection, $"{map} Primary Tonemap", tonemapPrimary, new ConfigDescription(
-                "The default camera position offset relative to the first person view (in meters).",
+                "Primary tonemap vector.",
                 tags: new ConfigurationManagerAttributes { Order = 2, Browsable = browsable, IsAdvanced = true }
             )),
             config.Bind(mapSection, $"{map} Secondary Tonemap", tonemapSecondary, new ConfigDescription(
-                "The default camera position offset relative to the first person view (in meters).",
+                "Secondary tonemap vector.",
                 tags: new ConfigurationManagerAttributes { Order = 1, Browsable = browsable, IsAdvanced = true }
             )),
             config.Bind(mapSection, $"{map} Enable Fog Tuning", fogEnabled, new ConfigDescription(

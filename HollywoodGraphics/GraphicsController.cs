@@ -2,36 +2,38 @@
 using EFT;
 using HollywoodGraphics.Components;
 using UnityEngine;
+using AmbientOcclusion = HollywoodGraphics.Components.AmbientOcclusion;
+using Bloom = HollywoodGraphics.Components.Bloom;
 
 namespace HollywoodGraphics;
 
 public class GraphicsController : MonoBehaviour
 {
     public Player player;
-    
+
     private Atmosphere _atmosphere;
     private Bloom _bloom;
     private Tonemap _tonemap;
     private AmbientOcclusion _ambientOcclusion;
-    
+
     public void Start()
     {
         _atmosphere = new Atmosphere(player);
         Plugin.Log.LogInfo("Atmospherics initialized");
-        
+
         _bloom = new Bloom();
         Plugin.Log.LogInfo("Bloom initialized");
-        
+
         _tonemap = new Tonemap();
         Plugin.Log.LogInfo("Tonemap initialized");
-        
+
         _ambientOcclusion = new AmbientOcclusion();
         Plugin.Log.LogInfo("Ambient Occlusion initialized");
-        
+
         UpdateMapSettings();
         Plugin.Log.LogInfo("Updated all settings");
     }
-    
+
     public void UpdateMapSettings()
     {
         if (Plugin.GraphicsConfig.Current.LodEnabled.Value)
@@ -52,7 +54,7 @@ public class GraphicsController : MonoBehaviour
         {
             _tonemap.Disable();
         }
-        
+
         // Apply per map bloom stuff
         _bloom.UpdateSettings();
         // Apply per map atmospherics
@@ -73,10 +75,15 @@ public class GraphicsController : MonoBehaviour
     {
         _bloom.UpdateSettings();
     }
-    
+
     public void UpdateLensDust()
     {
         _bloom.UpdateLensDust();
+    }
+
+    public void UpdateMotionBlurSettings()
+    {
+        HfxMotionBlur.UpdateSettings();
     }
 
     private void Update()

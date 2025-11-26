@@ -13,14 +13,15 @@ namespace HollywoodGraphics;
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public class Plugin : BaseUnityPlugin
 {
-    public const string HollywoodGraphicsVersion = "1.1.2";
+    public const string HollywoodGraphicsVersion = "1.1.3";
     public static ManualLogSource Log;
 
     public static GraphicsConfig GraphicsConfig;
     private static ConfigEntry<bool> _loggingEnabled;
-    public static ConfigEntry<bool> TestEnabled;
     private static bool _amandsDetected;
     
+    // Required by HFX integration, but there's no locally detectable usage so Rider yells at us
+    // ReSharper disable once UnusedMember.Global
     public static ConfigEntry<float> lensDustIntensity => GraphicsConfig.Bloom.DustIntensity;
 
     private void Awake()
@@ -52,7 +53,7 @@ public class Plugin : BaseUnityPlugin
 
         if (GraphicsConfig.FogFixScattering.Value)
         {
-            new RayleighScatterringBumpPatch().Enable();
+            new RayleighScatteringBumpPatch().Enable();
         }
 
         Log.LogInfo("Initialization finished");

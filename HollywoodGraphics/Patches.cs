@@ -12,7 +12,7 @@ using UnityEngine;
 namespace HollywoodGraphics;
 
 
-public class RayleighScatterringBumpPatch : ModulePatch
+public class RayleighScatteringBumpPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

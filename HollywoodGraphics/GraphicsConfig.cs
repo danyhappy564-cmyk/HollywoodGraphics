@@ -240,6 +240,10 @@ public class GraphicsConfig
     public readonly ConfigEntry<float> LightFlareIntensity;
     public readonly ConfigEntry<float> LightFlareSize;
 
+    public readonly ConfigEntry<bool> MotionBlurEnabled;
+    public readonly ConfigEntry<float> MotionBlurShutterAngle;
+    public readonly ConfigEntry<int> MotionBlurSampleCount;
+    
     public readonly ConfigEntry<bool> FogFixScattering;
     public readonly ConfigEntry<bool> FogIndoorReductionEnabled;
     public readonly ConfigEntry<float> FogIndoorReductionAmount;
@@ -381,6 +385,25 @@ public class GraphicsConfig
 
         Bloom = new BloomConfig(config);
 
+        MotionBlurEnabled = config.Bind("04. General", "Motion Blur Enabled", false, new ConfigDescription(
+            "In case you want to RP as an old camera with slow shutter speed.",
+            null,
+            new ConfigurationManagerAttributes { Order = 7 }
+        ));
+        MotionBlurEnabled.SettingChanged += OnMotionBlurSettingsChanged;
+        MotionBlurShutterAngle = config.Bind("04. General", "Motion Blur Intensity", 270f, new ConfigDescription(
+            "Adjusts the amount of motion blur (ie shutter angle).",
+            new AcceptableValueRange<float>(1f, 360f),
+            new ConfigurationManagerAttributes { Order = 6 }
+        ));
+        MotionBlurShutterAngle.SettingChanged += OnMotionBlurSettingsChanged;
+        MotionBlurSampleCount = config.Bind("04. General", "Motion Blur Quality", 10, new ConfigDescription(
+            "Adjusts the quality of motion blur (ie sample count).",
+            new AcceptableValueRange<int>(4, 32),
+            new ConfigurationManagerAttributes { Order = 5 }
+        ));
+        MotionBlurSampleCount.SettingChanged += OnMotionBlurSettingsChanged;
+        
         FogFixScattering = config.Bind("04. General", "Fix Cursed Fog (RESTART)", true, new ConfigDescription(
             "Fix the cursed glowing fog during overcast sunrises/sunsets.",
             null,
@@ -606,5 +629,10 @@ public class GraphicsConfig
     private static void OnAtmosphereSettingsChanged(object o, EventArgs e)
     {
         Singleton<GraphicsController>.Instance?.UpdateAtmosphereSettings();
+    }
+    
+    private static void OnMotionBlurSettingsChanged(object o, EventArgs e)
+    {
+        Singleton<GraphicsController>.Instance?.UpdateMotionBlurSettings();
     }
 }

@@ -30,6 +30,7 @@ public class GraphicsController : MonoBehaviour
         _ambientOcclusion = new AmbientOcclusion();
         Plugin.Log.LogInfo("Ambient Occlusion initialized");
 
+        UpdateMotionBlurSettings();
         UpdateMapSettings();
         Plugin.Log.LogInfo("Updated all settings");
     }

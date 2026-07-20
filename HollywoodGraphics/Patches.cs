@@ -2,41 +2,12 @@
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
-using EFT.Weather;
 using GPUInstancer;
 using HarmonyLib;
 using MultiFlare;
 using SPT.Reflection.Patching;
-using UnityEngine;
 
 namespace HollywoodGraphics;
-
-
-public class RayleighScatteringBumpPatch : ModulePatch
-{
-    protected override MethodBase GetTargetMethod()
-    {
-        return typeof(ToDController).GetMethod(nameof(ToDController.Update));
-    }
-
-    [PatchPostfix]
-    // ReSharper disable once InconsistentNaming
-    public static void Postfix(ToDController __instance)
-    {
-        var sky = TOD_Sky.Instance;
-        var weatherController = WeatherController.Instance;
-        
-        if (weatherController == null || sky == null)
-            return;
-        
-        var sunHeightFactor = Mathf.Sqrt(Mathf.InverseLerp(0.2f, 0f, sky.SunDirection.y));
-        var cloudinessFactor = Mathf.InverseLerp(-1f, 0f, weatherController.WeatherCurve.Cloudiness);
-        var fogFactor = Mathf.Sqrt(Mathf.InverseLerp(0.008f, 0.015f, weatherController.WeatherCurve.Fog));
-        
-        sky.Atmosphere.RayleighMultiplier += 1.5f * sunHeightFactor * cloudinessFactor * fogFactor;
-        sky.Day.ColorMultiplier = 1f - 0.8f * sunHeightFactor * cloudinessFactor * fogFactor;
-    }
-}
 
 
 public class GraphicsControllerInitPatch : ModulePatch
@@ -50,8 +21,8 @@ public class GraphicsControllerInitPatch : ModulePatch
     // ReSharper disable once InconsistentNaming
     public static void Postfix(GameWorld __instance)
     {
+        Plugin.Log.LogInfo("Running game world initialization and creating graphics controller");
         var graphicsController = __instance.gameObject.AddComponent<GraphicsController>();
-        graphicsController.player = __instance.MainPlayer;
         Singleton<GraphicsController>.Create(graphicsController);
     }
 }
@@ -60,13 +31,14 @@ public class GraphicsRaidInitPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_37));
+        return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_41));
     }
 
     [PatchPrefix]
     // ReSharper disable once InconsistentNaming
     public static void Prefix(RaidSettings ____raidSettings)
     {
+        Plugin.Log.LogInfo("Running raid initialization");
         var mapName = ____raidSettings.LocationId.ToLower();
         Plugin.GraphicsConfig.SetCurrentMap(mapName);
         
@@ -119,7 +91,7 @@ public class TerrainDetailOverridePatch : ModulePatch
         var overrides = Plugin.GraphicsConfig.Current;
         
         Plugin.Log.LogInfo(
-            $"Terrain detail overrides: {overrides.Name} enabled: {overrides.LodEnabled.Value} terrain: {__instance.terrain.name} DistT: {__instance.terrain.detailObjectDistance} Dist: {__instance.terrainSettings.maxDetailDistance} DistL: {__instance.terrainSettings.maxDetailDistanceLegacy} Dens: {__instance.terrainSettings.detailDensity}"
+            $"Terrain detail overrides: {overrides.Name} Enabled: {overrides.LodEnabled.Value} ScaleDist: {overrides.DetailDistance.Value} ScaleDens: {overrides.DetailDensity.Value} Terrain: {__instance.terrain.name} Dist: {__instance.terrainSettings.maxDetailDistance} DistL: {__instance.terrainSettings.maxDetailDistanceLegacy}"
         );
         
         if (!overrides.LodEnabled.Value)

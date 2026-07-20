@@ -13,7 +13,7 @@ namespace HollywoodGraphics;
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public class Plugin : BaseUnityPlugin
 {
-    public const string HollywoodGraphicsVersion = "1.1.4";
+    public const string HollywoodGraphicsVersion = "2.0.0";
     public static ManualLogSource Log;
 
     public static GraphicsConfig GraphicsConfig;
@@ -50,12 +50,7 @@ public class Plugin : BaseUnityPlugin
             new GraphicsControllerInitPatch().Enable();
             new TerrainDetailOverridePatch().Enable();
         }
-
-        if (GraphicsConfig.FogFixScattering.Value)
-        {
-            new RayleighScatteringBumpPatch().Enable();
-        }
-
+        
         Log.LogInfo("Initialization finished");
 
         if (_loggingEnabled.Value)
@@ -82,9 +77,9 @@ public class Plugin : BaseUnityPlugin
                 ConfigurationTemplates.SetJanky(entry.ConfigFile);
             }
             
-            if (GUILayout.Button("Disable All"))
+            if (GUILayout.Button("Potato"))
             {
-                ConfigurationTemplates.SetDisabled(entry.ConfigFile);
+                ConfigurationTemplates.SetPotato(entry.ConfigFile);
             }
 
             if (GUILayout.Button("Defaults"))

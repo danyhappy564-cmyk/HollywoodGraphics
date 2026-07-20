@@ -9,19 +9,13 @@ public static class ConfigurationTemplates
         // First reset to the defaults
         SetDefaults(mainConfig);
 
-        Plugin.GraphicsConfig.Bloom.DustIntensity.Value = 0.5f;
-        
-        Plugin.GraphicsConfig.SetMapConfig("Customs", true, 4f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("FactoryDay", true, 10f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("FactoryNight", true, 10f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("Interchange", true, 4f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("Lighthouse", true, 4f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("Reserve", true, 4f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("GroundZero", true, 4f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("Shoreline", true, 4f, 2.5f, 2f);
-        Plugin.GraphicsConfig.SetMapConfig("Woods", true, 4f, 2.5f, 2f);
-
-        Plugin.GraphicsConfig.ToggleTonemaps(true);
+        Plugin.GraphicsConfig.SetMapLodConfig("Customs", true, 2.5f, 2f);
+        Plugin.GraphicsConfig.SetMapLodConfig("Interchange", true,  2.5f, 2f);
+        Plugin.GraphicsConfig.SetMapLodConfig("Lighthouse", true,  2.5f, 2f);
+        Plugin.GraphicsConfig.SetMapLodConfig("Reserve", true,  2.5f, 2f);
+        Plugin.GraphicsConfig.SetMapLodConfig("GroundZero", true,  2.5f, 2f);
+        Plugin.GraphicsConfig.SetMapLodConfig("Shoreline", true,  2.5f, 2f);
+        Plugin.GraphicsConfig.SetMapLodConfig("Woods", true,  2.5f, 2f);
     }
 
     public static void SetPotato(ConfigFile mainConfig)
@@ -37,35 +31,13 @@ public static class ConfigurationTemplates
         Plugin.GraphicsConfig.AOMultiBounceEnabled.Value = false;
         Plugin.GraphicsConfig.AOColorBleedEnabled.Value = false;
         
-        Plugin.GraphicsConfig.SetMapConfig("Customs", true, 1f, 0.5f, 0.5f);
-        Plugin.GraphicsConfig.SetMapConfig("FactoryDay", true, 1f, 0.5f, 0.5f);
-        Plugin.GraphicsConfig.SetMapConfig("FactoryNight", true, 1f, 0.5f, 0.5f);
-        Plugin.GraphicsConfig.SetMapConfig("Interchange", true, 1f, 0.5f, 0.5f);
-        Plugin.GraphicsConfig.SetMapConfig("Lighthouse", true, 1f, 0.5f, 0.5f);
-        Plugin.GraphicsConfig.SetMapConfig("Reserve", true, 1f, 0.5f, 0.5f);
-        Plugin.GraphicsConfig.SetMapConfig("GroundZero", true, 1f, 0.5f, 0.5f);
-        Plugin.GraphicsConfig.SetMapConfig("Shoreline", true, 1f, 0.5f, 0.5f);
-        Plugin.GraphicsConfig.SetMapConfig("Streets", true, 1f, 0.25f, 0.25f);
-        Plugin.GraphicsConfig.SetMapConfig("Woods", true, 1f, 0.5f, 0.5f);
-    }
-
-    public static void SetDisabled(ConfigFile mainConfig)
-    {
-        // First reset to the defaults
-        SetDefaults(mainConfig);
-        
-        Plugin.GraphicsConfig.Bloom.UseLensDust.Value = false;
-        Plugin.GraphicsConfig.Bloom.UseAnamorphicFlare.Value = false;
-        Plugin.GraphicsConfig.Bloom.UseStarFlare.Value = false;
-
-        Plugin.GraphicsConfig.AOEnabled.Value = false;
-        Plugin.GraphicsConfig.AOMultiBounceEnabled.Value = false;
-        Plugin.GraphicsConfig.AOColorBleedEnabled.Value = false;
-        
-        Plugin.GraphicsConfig.LightFlareEnabled.Value = false;
-        Plugin.GraphicsConfig.SunColorEnabled.Value = false;
-        
-        Plugin.GraphicsConfig.ToggleTonemaps(false);
+        Plugin.GraphicsConfig.SetMapLodConfig("Customs", false);
+        Plugin.GraphicsConfig.SetMapLodConfig("Interchange", false);
+        Plugin.GraphicsConfig.SetMapLodConfig("Lighthouse", false);
+        Plugin.GraphicsConfig.SetMapLodConfig("Reserve", false);
+        Plugin.GraphicsConfig.SetMapLodConfig("GroundZero", false);
+        Plugin.GraphicsConfig.SetMapLodConfig("Shoreline", false);
+        Plugin.GraphicsConfig.SetMapLodConfig("Woods", false);
     }
     
     public static void SetDefaults(ConfigFile mainConfig)

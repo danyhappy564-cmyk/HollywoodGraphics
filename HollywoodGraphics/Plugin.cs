@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
@@ -13,7 +14,8 @@ namespace HollywoodGraphics;
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public class Plugin : BaseUnityPlugin
 {
-    public const string HollywoodGraphicsVersion = "2.0.0";
+    public const string MajorMinorVersion = "2.0";
+    public const string HollywoodGraphicsVersion = $"{MajorMinorVersion}.0";
     public static ManualLogSource Log;
 
     public static GraphicsConfig GraphicsConfig;
@@ -42,7 +44,38 @@ public class Plugin : BaseUnityPlugin
         }
         
         SetupConfig();
+        
+        // Versioning
+        var key = new ConfigDefinition("99. Internal", "ConfigVersion");
+        var description = new ConfigDescription(
+            "Do not modify.",
+            null,
+            new ConfigurationManagerAttributes { Order = 0, IsAdvanced = true }
+        );
+        
+        // Stub entry that will get whatever value is there without accidentally hiding it by a default
+        var versionConfig = Config.Bind(key, "", description);
 
+        if (versionConfig is not { Value: MajorMinorVersion })
+        {
+            Config.Clear();
+            File.WriteAllText(Config.ConfigFilePath, "");
+            Config.Reload();
+
+            SetupConfig();
+        
+            Log.LogInfo($"Configuration reset for version {MajorMinorVersion}.");
+        }
+        else
+        {
+            // We have to remove the stub entry so that we can replace it with the real one below
+            Config.Remove(key);
+        }
+        
+        versionConfig = Config.Bind(key, MajorMinorVersion, description);
+        versionConfig.Value = MajorMinorVersion;
+
+        // Patches
         if (!_amandsDetected)
         {
             new LampControllerAwakePostfixPatch().Enable();
@@ -92,7 +125,7 @@ public class Plugin : BaseUnityPlugin
     private void SetupConfig()
     {
         const string general = "00. General";
-        const string debug = "99. Debug";
+        const string debug = "98. Debug";
 
         /*
          * General

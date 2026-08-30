@@ -74,7 +74,7 @@ public class Bloom
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Update()
     {
-        if (_weatherController == null)
+        if (_weatherController == null || _ultimateBloom == null)
             return;
 
         var nightFactor = Mathf.InverseLerp(0f, -0.1f, _weatherController.SunHeight);
@@ -155,6 +155,11 @@ public class Bloom
     
     private static void ResetIntensities(float[] intensities)
     {
+        // AddComponent<UltimateBloom>() hasn't run its own Start()/Awake() yet at this
+        // point (that's next Unity lifecycle tick, not synchronous with AddComponent),
+        // so on a camera that didn't already carry a fully-serialized UltimateBloom
+        // (ours doesn't ship one), these intensity arrays are still null here.
+        if (intensities == null) return;
         for (var i = 0; i < intensities.Length; i++)
         {
             Plugin.Log.LogInfo($"Intensity: {intensities[i]}");

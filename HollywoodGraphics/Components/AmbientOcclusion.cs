@@ -17,6 +17,16 @@ public class AmbientOcclusion
         }
         
         _hbao = camera.GetComponent<HBAO>();
+
+        // same class of bug as Bloom's missing check: a camera without a
+        // pre-configured HBAO (ours doesn't ship one) leaves this null, and every
+        // line below unconditionally dereferences it.
+        if (_hbao == null)
+        {
+            Plugin.Log.LogError("AmbientOcclusion: No HBAO component on the camera!");
+            return;
+        }
+
         _defaultAOSettings = _hbao.aoSettings;
         _defaultColorBleedingSettings = _hbao.colorBleedingSettings;
 
@@ -25,6 +35,7 @@ public class AmbientOcclusion
 
     public void UpdateSettings()
     {
+        if (_hbao == null) return;
         if (Plugin.GraphicsConfig.AOEnabled.Value)
         {
             var settings = _hbao.aoSettings;

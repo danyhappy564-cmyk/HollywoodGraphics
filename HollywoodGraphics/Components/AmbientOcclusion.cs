@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace HollywoodGraphics.Components;
 
 public class AmbientOcclusion

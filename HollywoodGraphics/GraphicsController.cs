@@ -61,8 +61,11 @@ public class GraphicsController : MonoBehaviour
         // continuous cost on top of whatever caused the constructor to fail in the
         // first place. Doesn't matter WHY the constructor failed; just don't run on a
         // null Bloom.
-        if (_bloom == null) return;
-        _bloom.Update();
+        // independent of each other: a failed Bloom construction (e.g. on a camera
+        // without a fully pre-configured UltimateBloom) must not also skip the AO/NVG
+        // guard below - they don't share any state.
+        _bloom?.Update();
+        _ambientOcclusion?.Update();
     }
 
     private void OnDestroy()

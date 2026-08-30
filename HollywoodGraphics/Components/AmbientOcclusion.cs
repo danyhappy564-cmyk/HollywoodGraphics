@@ -1,10 +1,22 @@
-﻿namespace HollywoodGraphics.Components;
+namespace HollywoodGraphics.Components;
 
 public class AmbientOcclusion
 {
+    private readonly Camera _camera;
     private readonly HBAO _hbao;
     private readonly HBAO_Core.AOSettings _defaultAOSettings;
     private readonly HBAO_Core.ColorBleedingSettings _defaultColorBleedingSettings;
+
+    // (field report: night vision reads darker than it should) image effects run in
+    // component order, and HBAO sits ahead of NightVision on the camera - so ambient
+    // occlusion darkens crevices/shadows in the frame BEFORE night vision amplifies
+    // it, leaving the goggles with less to work with than intended. no safe runtime
+    // API exists to reorder components (that's editor-only, and would touch every
+    // other effect after HBAO too), so instead: suppress AO outright while NVG is
+    // actually on, and hand it straight back the moment it's off.
+    private BSG.CameraEffects.NightVision _nightVision;
+    private bool _nightVisionSearched;
+    private bool _suppressedForNvg;
 
     public AmbientOcclusion()
     {
@@ -15,7 +27,8 @@ public class AmbientOcclusion
             Plugin.Log.LogError("AmbientOcclusion: No camera found!");
             return;
         }
-        
+
+        _camera = camera;
         _hbao = camera.GetComponent<HBAO>();
 
         // same class of bug as Bloom's missing check: a camera without a
@@ -56,6 +69,32 @@ public class AmbientOcclusion
         {
             _hbao.aoSettings = _defaultAOSettings;
             _hbao.colorBleedingSettings = _defaultColorBleedingSettings;
+        }
+    }
+
+    // called every frame from GraphicsController.Update() alongside Bloom's own
+    // Update() - cheap (one bool read once NightVision is cached, a component
+    // enabled-flag write only on an actual on/off transition).
+    public void Update()
+    {
+        if (_hbao == null || _camera == null) return;
+
+        if (!_nightVisionSearched)
+        {
+            _nightVisionSearched = true;
+            _nightVision = _camera.GetComponent<BSG.CameraEffects.NightVision>();
+        }
+        var nvOn = _nightVision != null && _nightVision.enabled;
+
+        if (nvOn && !_suppressedForNvg)
+        {
+            _suppressedForNvg = true;
+            _hbao.enabled = false;
+        }
+        else if (!nvOn && _suppressedForNvg)
+        {
+            _suppressedForNvg = false;
+            _hbao.enabled = true;
         }
     }
 }

@@ -26,23 +26,25 @@ public class GraphicsController : MonoBehaviour
 
     public void UpdateMapSettings()
     {
-        // Apply per map bloom stuff
-        _bloom.UpdateSettings();
+        // Apply per map bloom stuff — same null-Bloom guard as Update(): a failed
+        // Start() leaves this null, and these are all externally-callable (config UI,
+        // map/weather change hooks), not just our own Update loop.
+        _bloom?.UpdateSettings();
     }
-    
+
     public void UpdateAmbientOcclusionSettings()
     {
-        _ambientOcclusion.UpdateSettings();
+        _ambientOcclusion?.UpdateSettings();
     }
 
     public void UpdateBloomSettings()
     {
-        _bloom.UpdateSettings();
+        _bloom?.UpdateSettings();
     }
 
     public void UpdateLensDust()
     {
-        _bloom.UpdateLensDust();
+        _bloom?.UpdateLensDust();
     }
 
     public void UpdateMotionBlurSettings()
@@ -52,6 +54,14 @@ public class GraphicsController : MonoBehaviour
 
     private void Update()
     {
+        // final safety net: if Start()'s `_bloom = new Bloom()` threw partway through
+        // construction (e.g. ResetIntensities hitting a still-null intensities array
+        // on a camera without a fully pre-configured UltimateBloom), _bloom is left
+        // null and this NREd every single frame for the rest of the raid - a real,
+        // continuous cost on top of whatever caused the constructor to fail in the
+        // first place. Doesn't matter WHY the constructor failed; just don't run on a
+        // null Bloom.
+        if (_bloom == null) return;
         _bloom.Update();
     }
 

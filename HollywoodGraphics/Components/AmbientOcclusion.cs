@@ -85,6 +85,13 @@ public class AmbientOcclusion
         {
             _nightVisionSearched = true;
             _nightVision = _camera.GetComponent<BSG.CameraEffects.NightVision>();
+            // DIAGNOSTIC (2026-09, field report: rebuilt with the AO/NVG guard above and
+            // NVG still reads exactly as dark as before - checking whether the guard is
+            // firing at all, or whether NightVision.enabled just never reflects real NVG
+            // state on this build).
+            Plugin.Log.LogWarning(_nightVision == null
+                ? "[NvgAoDiag] NightVision component not found on camera — the AO/NVG guard can never fire"
+                : $"[NvgAoDiag] NightVision component found, initial enabled={_nightVision.enabled}");
         }
         var nvOn = _nightVision != null && _nightVision.enabled;
 
@@ -92,11 +99,13 @@ public class AmbientOcclusion
         {
             _suppressedForNvg = true;
             _hbao.enabled = false;
+            Plugin.Log.LogWarning("[NvgAoDiag] NVG turned on — HBAO suppressed");
         }
         else if (!nvOn && _suppressedForNvg)
         {
             _suppressedForNvg = false;
             _hbao.enabled = true;
+            Plugin.Log.LogWarning("[NvgAoDiag] NVG turned off — HBAO restored");
         }
     }
 }

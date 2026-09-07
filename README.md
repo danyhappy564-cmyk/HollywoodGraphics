@@ -88,3 +88,30 @@
 
 - 나머지 패치 대상(`GameWorld.OnGameStarted`, `LampController.Awake`,
   `GPUInstancerDetailManager.Awake`)은 실제 이름이라 없어지면 컴파일 에러로 잡힙니다
+
+**(같은 날 추가 — 공식 위키 확인 후)**
+
+SPT 공식 위키의 [Client Mod Migration 4.0 to 4.1] 문서 확인 결과:
+
+> **4.1은 클라이언트를 역난독화했습니다.** 타입들이 진짜 이름과 네임스페이스를 갖게 됐고,
+> **4.0 클라이언트 모드는 전부 4.1로 재빌드해야 합니다.**
+
+위키의 5,957줄짜리 이름 매핑 표에 이 모드가 참조하는 식별자를 전부 대조했습니다.
+**바뀐 것은 하나뿐입니다** — 이 모드가 EFT 타입을 적게 건드리는 덕분입니다:
+
+| 4.0 | 4.1 |
+| --- | --- |
+| `CameraClass` | `EFT.CameraControl.CameraManager` |
+
+3곳(`AmbientOcclusion.cs`, `Bloom.cs`, `MotionBlur.cs`) 치환 + `using EFT.CameraControl;` 추가.
+
+나머지(`GameWorld`, `TarkovApplication`, `LampController`, `GPUInstancerDetailManager`,
+`FlareLight`, `MaterialEmission`, `RaidSettings`, `BSG.CameraEffects.NightVision`,
+`HBAO`, `UltimateBloom`)는 표에 없으므로 이름이 그대로입니다.
+
+4.1.4에서 되돌린 직렬화 필드 이름 표(`AmbianceAffectedComponent.String` 등)도 확인했는데
+이 모드는 해당 없습니다.
+
+**여전히 남은 위험**: `TarkovApplication.method_41`. 위키의 매핑 표는 **타입 이름만**
+다루고 메서드 이름은 다루지 않습니다. 위에 적은 대로 이건 조용히 깨지는 쪽이라
+`PatchTarget` 로그로 확인해야 합니다.

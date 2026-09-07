@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using EFT.Weather;
 using UnityEngine;
+using EFT.CameraControl;
 
 namespace HollywoodGraphics.Components;
 
@@ -16,7 +17,7 @@ public class Bloom
     public Bloom()
     {
         // Find the main camera
-        var camera = CameraClass.Instance?.Camera;
+        var camera = CameraManager.Instance?.Camera;
 
         if (camera == null)
         {

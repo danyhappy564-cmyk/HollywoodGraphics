@@ -1,3 +1,4 @@
+using EFT.CameraControl;
 ﻿using UnityEngine.Rendering.PostProcessing;
 
 namespace HollywoodGraphics.Components;
@@ -6,7 +7,7 @@ public class HfxMotionBlur
 {
     public static void UpdateSettings()
     {
-        var camera = CameraClass.Instance?.Camera;
+        var camera = CameraManager.Instance?.Camera;
 
         if (camera == null)
         {

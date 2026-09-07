@@ -163,3 +163,30 @@ SPT 공식 위키 [Client Modding Quick Guide] Step 1-5: 역난독화는 설치�
 (탐색 순서 정정) 게임과 BepInEx는 설치 루트에 있습니다. `SPT_Runtime\`은 SPT 자체
 런처·서버·user 폴더용입니다. 한때 잘못 읽고 `SPT_Runtime`을 먼저 보게 했던 것을
 되돌렸습니다.
+
+**(같은 날 — `method_41` 확정: `LocalGameMatching`)**
+
+덤프 두 개(난독화 상태 / 역난독화 상태)가 **같은 파일의 전·후**라 메서드 순서가
+같다는 점을 이용해 번호를 역산했습니다. 난독화된 메서드만 순서대로 0,1,2… 세면
+de4dot의 번호가 재구성됩니다.
+
+`assembly-tool`이 이름을 알려준 메서드 11개를 앵커로 검증한 결과 **오프셋 +2에서
+11/11 일치**했습니다 (`method_38 = OnApplicationLoaded`, `method_49 = LocalGameCreate` …).
+
+그 정렬에서:
+
+```
+method_40 = OnAbortFinished
+method_41 = LocalGameMatching      ← Task LocalGameMatching(TimeAndWeatherSettings, bool)
+method_42 = NetworkGameMatching    ← 네트워크 게임용 짝
+```
+
+**`LocalGameMatching`** — 싱글플레이 라이드로 매칭해 들어가는 지점입니다. `_raidSettings`가
+채워져 있고 맵이 로드되기 전이라, 맵별 그래픽 오버라이드를 정하는 이 패치의 자리로
+의미까지 정확합니다. 바로 옆 42번이 `NetworkGameMatching`인 것도 이 근방이 라이드
+시작 구간임을 뒷받침합니다.
+
+이제 진짜 이름이라 다음에 없어지면 **컴파일 에러**로 잡힙니다. 조용히 엉뚱한 메서드에
+붙을 일이 없어져서 `PatchTarget`(로그로 감시하던 장치)은 삭제했습니다.
+
+`_raidSettings`는 덤프에서도 그대로 있습니다 (`field RaidSettings _raidSettings`).

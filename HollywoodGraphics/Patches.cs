@@ -31,14 +31,15 @@ public class GraphicsRaidInitPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        // Numbered, and the one most worth watching: this prefix reads the private
-        // _raidSettings field, which resolves against TarkovApplication rather than
-        // against the method, so a renumbered target binds without complaint and simply
-        // runs at the wrong moment. See PatchTarget.
-        return PatchTarget.Numbered(
-            typeof(TarkovApplication),
-            nameof(TarkovApplication.method_41),
-            "the raid init method, with _raidSettings populated");
+        // Was method_41. 4.1 named it, which settles what it always was: matching into a
+        // local raid, the moment _raidSettings is populated and before the map loads.
+        // NetworkGameMatching sits beside it as the multiplayer counterpart.
+        //
+        // Worth naming because the old form was the one that could break silently: the
+        // prefix reads _raidSettings off TarkovApplication rather than off the method, so
+        // a renumbered target used to bind without complaint and merely run at the wrong
+        // moment. A name that goes away is a compile error instead.
+        return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.LocalGameMatching));
     }
 
     [PatchPrefix]

@@ -115,3 +115,35 @@ SPT 공식 위키의 [Client Mod Migration 4.0 to 4.1] 문서 확인 결과:
 **여전히 남은 위험**: `TarkovApplication.method_41`. 위키의 매핑 표는 **타입 이름만**
 다루고 메서드 이름은 다루지 않습니다. 위에 적은 대로 이건 조용히 깨지는 쪽이라
 `PatchTarget` 로그로 확인해야 합니다.
+
+**(같은 날 재차 추가 — SPT `assembly-tool` 소스 확인 후)**
+
+역난독화 도구(`SP-Tushonka/assembly-tool`) 소스와 그 매핑 데이터를 확인했습니다.
+**메서드에는 자동 개명기가 없습니다** — 명시적 `MethodRenames` 목록으로만 바뀝니다.
+
+`Assets/Json/Mappings/Named-Class-Mappings.json5`의 `EFT.TarkovApplication` 항목:
+
+```
+"MethodRenames": {
+    "method_9":  "ShowProfileLoadingScreen",   "method_10": "ShowCriticalBackendErrorDialog",
+    "method_13": "ShowLegacyLoginScreen",      "method_16": "InitNotificationManager",
+    "method_17": "DestroyNotificationManager", "method_32": "RunProfile",
+    "method_35": "ShowTimeHasComeScreen",      "method_36": "MainMenu",
+    "method_38": "OnApplicationLoaded",        "method_49": "LocalGameCreate",
+    "method_51": "TryUnloadGame",
+}
+```
+
+**`method_41`은 목록에 없습니다.** 즉 SPT는 이 메서드 이름을 건드리지 않고, 4.1에서도
+`method_41`로 남습니다. 빌드는 통과합니다.
+
+다만 이게 "같은 메서드"라는 보장은 아닙니다. 번호는 BSG의 난독화기가 매긴 것이라
+BSG가 클래스에 메서드를 넣고 빼면 밀립니다(목록에 `method_51`까지 있는 걸 보면
+현재 어셈블리에도 그 근처 번호대가 존재합니다). 그래서 `PatchTarget` 로그가
+여전히 확인 수단입니다.
+
+참고로 같은 목록의 `method_49` = `LocalGameCreate`는 이름만 보면 라이드 시작에
+해당합니다. 만약 `method_41` 프리픽스가 엉뚱한 시점에 도는 것으로 확인되면
+그쪽이 유력한 후보입니다 — 다만 이건 어셈블리를 봐야 확정할 수 있습니다.
+
+`_raidSettings`는 난독화 접두사로 시작하지 않으므로 필드 개명 대상이 아닙니다. 그대로입니다.

@@ -31,7 +31,14 @@ public class GraphicsRaidInitPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_41));
+        // Numbered, and the one most worth watching: this prefix reads the private
+        // _raidSettings field, which resolves against TarkovApplication rather than
+        // against the method, so a renumbered target binds without complaint and simply
+        // runs at the wrong moment. See PatchTarget.
+        return PatchTarget.Numbered(
+            typeof(TarkovApplication),
+            nameof(TarkovApplication.method_41),
+            "the raid init method, with _raidSettings populated");
     }
 
     [PatchPrefix]

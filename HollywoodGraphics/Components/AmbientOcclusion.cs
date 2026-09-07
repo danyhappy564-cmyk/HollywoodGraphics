@@ -1,5 +1,3 @@
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using EFT.CameraControl;
 
@@ -27,7 +25,6 @@ public class AmbientOcclusion
     // toggle key) identified the real one: the private field _on tracks whether the
     // goggles are actively switched on right now, not just equipped.
     private BSG.CameraEffects.NightVision _nightVision;
-    private FieldInfo _nightVisionOnField;
     private bool _nightVisionSearched;
     private bool _suppressedForNvg;
 
@@ -86,8 +83,8 @@ public class AmbientOcclusion
     }
 
     // called every frame from GraphicsController.Update() alongside Bloom's own
-    // Update() - cheap (one reflected bool read once NightVision/_on are cached, a
-    // component enabled-flag write only on an actual on/off transition).
+    // Update() - cheap (one bool read, a component enabled-flag write only on an actual
+    // on/off transition).
     public void Update()
     {
         if (_hbao == null || _camera == null) return;
@@ -97,50 +94,30 @@ public class AmbientOcclusion
             _nightVisionSearched = true;
             _nightVision = _camera.GetComponent<BSG.CameraEffects.NightVision>();
 
-            // Public as well as non-public. 4.1's deobfuscation moved names around and it
-            // also changes accessibility in places, and a NonPublic-only lookup misses a
-            // field that merely became public, which looks identical to one that was
-            // renamed.
-            _nightVisionOnField = _nightVision?.GetType()
-                .GetField("_on", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-
             if (_nightVision == null)
             {
                 // Not the same as the field being missing, and it used to look the same
                 // in the log: nothing. Without the component there is nothing to track,
-                // so the guard is off either way, and that is worth saying out loud.
+                // so the guard is off and AO stays on, which is worth saying out loud.
                 Plugin.Log.LogWarning(
                     "[NvgAoDiag] no NightVision component on the camera — AO/NVG guard "
                     + "inactive, AO stays on.");
             }
-            else if (_nightVisionOnField != null)
-            {
-                // Said on success too. Silence used to cover both "found it" and "never
-                // looked", which is how a dead guard reads as a working one.
-                Plugin.Log.LogInfo(
-                    $"[NvgAoDiag] AO/NVG guard armed on NightVision.{_nightVisionOnField.Name} "
-                    + $"({(_nightVisionOnField.IsPublic ? "public" : "private")}).");
-            }
-            else
-            {
-                // Name the candidates rather than only the failure. Finding this field
-                // originally took a raid spent dumping every bool on the component and
-                // watching which one moved with the N key; if it has to be found again,
-                // the log should at least hand over the shortlist.
-                var bools = _nightVision.GetType()
-                    .GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                    .Where(f => f.FieldType == typeof(bool))
-                    .Select(f => f.Name)
-                    .ToArray();
-
-                Plugin.Log.LogWarning(
-                    "[NvgAoDiag] NightVision._on not found on this build — AO/NVG guard disabled, "
-                    + "falling back to always-on AO. bool fields present: "
-                    + (bools.Length > 0 ? string.Join(", ", bools) : "(none)"));
-            }
         }
 
-        var nvOn = _nightVisionOnField != null && (bool)_nightVisionOnField.GetValue(_nightVision);
+        // Read directly. This was reflection because _on was private in 4.0, and the
+        // reflection is what quietly stopped working on 4.1 -- not because the field was
+        // renamed, but because it turned public, which a NonPublic-only lookup misses in
+        // a way indistinguishable from it being gone.
+        //
+        // It is public now, so there is nothing left to look up. If BSG ever takes that
+        // away it is a build error on this machine rather than a guard that silently
+        // stops guarding, which is the whole reason the 4.1 deobfuscation is worth
+        // leaning on.
+        //
+        // Still _on rather than the On property: _on is what was verified to track the
+        // key in both directions, and On has its own getter that may not.
+        var nvOn = _nightVision != null && _nightVision._on;
 
         if (nvOn && !_suppressedForNvg)
         {

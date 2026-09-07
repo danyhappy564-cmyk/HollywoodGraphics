@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using EFT.CameraControl;
@@ -95,10 +96,31 @@ public class AmbientOcclusion
         {
             _nightVisionSearched = true;
             _nightVision = _camera.GetComponent<BSG.CameraEffects.NightVision>();
+
+            // Public as well as non-public. 4.1's deobfuscation moved names around and it
+            // also changes accessibility in places, and a NonPublic-only lookup misses a
+            // field that merely became public, which looks identical to one that was
+            // renamed.
             _nightVisionOnField = _nightVision?.GetType()
-                .GetField("_on", BindingFlags.Instance | BindingFlags.NonPublic);
+                .GetField("_on", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
             if (_nightVision != null && _nightVisionOnField == null)
-                Plugin.Log.LogWarning("[NvgAoDiag] NightVision._on not found on this build — AO/NVG guard disabled, falling back to always-on AO");
+            {
+                // Name the candidates rather than only the failure. Finding this field
+                // originally took a raid spent dumping every bool on the component and
+                // watching which one moved with the N key; if it has to be found again,
+                // the log should at least hand over the shortlist.
+                var bools = _nightVision.GetType()
+                    .GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                    .Where(f => f.FieldType == typeof(bool))
+                    .Select(f => f.Name)
+                    .ToArray();
+
+                Plugin.Log.LogWarning(
+                    "[NvgAoDiag] NightVision._on not found on this build — AO/NVG guard disabled, "
+                    + "falling back to always-on AO. bool fields present: "
+                    + (bools.Length > 0 ? string.Join(", ", bools) : "(none)"));
+            }
         }
 
         var nvOn = _nightVisionOnField != null && (bool)_nightVisionOnField.GetValue(_nightVision);

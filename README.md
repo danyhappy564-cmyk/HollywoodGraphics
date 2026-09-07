@@ -190,3 +190,28 @@ method_42 = NetworkGameMatching    ← 네트워크 게임용 짝
 붙을 일이 없어져서 `PatchTarget`(로그로 감시하던 장치)은 삭제했습니다.
 
 `_raidSettings`는 덤프에서도 그대로 있습니다 (`field RaidSettings _raidSettings`).
+
+**(같은 날 — 나이트비전 AO 가드가 4.1에서 죽어 있음)**
+
+라이드 로그:
+
+```
+[Warning:HollywoodGraphics] [NvgAoDiag] NightVision._on not found on this build
+                            — AO/NVG guard disabled, falling back to always-on AO
+```
+
+09/03에 고쳤던 나이트비전 AO 가드가 4.1에서 **무력화**됐습니다. 폴백은 설계대로
+안전하게 동작합니다(AO 상시 켜짐 = 수정 전 상태). 즉 크래시는 없지만 **나이트비전
+착용 시 화면이 어두워지는 원래 문제가 돌아왔습니다.**
+
+- 리플렉션 조회에 `BindingFlags.Public` 추가. 역난독화는 이름만이 아니라 접근성도
+  바꾸는데, `NonPublic`만 보면 **그냥 public이 된 필드를 놓치고** 이름이 바뀐 것과
+  똑같이 보입니다. 이것만으로 해결될 가능성이 있습니다
+
+- 그래도 못 찾으면 이제 **해당 컴포넌트의 bool 필드 목록을 로그에 같이 찍습니다.**
+  원래 이 필드를 찾을 때 라이드 하나를 통째로 써서 모든 bool을 덤프하고 N키를 눌러가며
+  값이 바뀌는 걸 관찰했었는데, 다시 찾아야 한다면 로그가 최소한 후보 목록은 넘겨주는 게
+  맞습니다
+
+나머지는 정상입니다 — 패치 28개 중 25개 적용, 실패 0개, 나머지 3개는 설정으로 꺼둔 것
+(탄피 물리, 래그돌 무기 드롭). 라이드 초기화와 맵 오버라이드(`woods`)도 확인됐습니다.

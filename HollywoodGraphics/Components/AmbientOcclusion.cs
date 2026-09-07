@@ -104,7 +104,24 @@ public class AmbientOcclusion
             _nightVisionOnField = _nightVision?.GetType()
                 .GetField("_on", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
-            if (_nightVision != null && _nightVisionOnField == null)
+            if (_nightVision == null)
+            {
+                // Not the same as the field being missing, and it used to look the same
+                // in the log: nothing. Without the component there is nothing to track,
+                // so the guard is off either way, and that is worth saying out loud.
+                Plugin.Log.LogWarning(
+                    "[NvgAoDiag] no NightVision component on the camera — AO/NVG guard "
+                    + "inactive, AO stays on.");
+            }
+            else if (_nightVisionOnField != null)
+            {
+                // Said on success too. Silence used to cover both "found it" and "never
+                // looked", which is how a dead guard reads as a working one.
+                Plugin.Log.LogInfo(
+                    $"[NvgAoDiag] AO/NVG guard armed on NightVision.{_nightVisionOnField.Name} "
+                    + $"({(_nightVisionOnField.IsPublic ? "public" : "private")}).");
+            }
+            else
             {
                 // Name the candidates rather than only the failure. Finding this field
                 // originally took a raid spent dumping every bool on the component and
